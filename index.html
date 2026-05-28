@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tool Forge — MCP Bridge Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: { colors: { forge: { 50: '#fef7ee', 100: '#fdedd3', 200: '#f9d7a5', 300: '#f5ba6d', 400: '#f09432', 500: '#ec7a11', 600: '#dd6007', 700: '#b74909', 800: '#923a0e', 900: '#76310f', 950: '#401705' } } } }
+    }
+  </script>
+  <style>
+    body { background: #0f0f0f; color: #e5e5e5; font-family: 'SF Mono', 'Fira Code', monospace; }
+    .card { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 8px; }
+    .card-header { border-bottom: 1px solid #2a2a2a; padding: 12px 16px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; color: #888; display: flex; align-items: center; justify-content: space-between; }
+    .mono { font-family: 'SF Mono', 'Fira Code', monospace; }
+    pre.json { background: #111; padding: 12px; border-radius: 6px; font-size: 12px; overflow-x: auto; max-height: 300px; }
+    input, select, textarea { background: #111; border: 1px solid #333; color: #e5e5e5; border-radius: 6px; padding: 8px 12px; font-size: 13px; width: 100%; }
+    input:focus, select:focus, textarea:focus { outline: none; border-color: #f09432; }
+    button { cursor: pointer; transition: all 0.15s; }
+    .btn-primary { background: #f09432; color: #0f0f0f; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 600; font-size: 13px; }
+    .btn-primary:hover { background: #ec7a11; }
+    .btn-edit { background: #1e3a5f; color: #93c5fd; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; }
+    .btn-edit:hover { background: #1e40af; }
+    .btn-danger { background: #7f1d1d; color: #fca5a5; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; }
+    .btn-danger:hover { background: #991b1b; }
+    .btn-ghost { background: transparent; border: 1px solid #333; color: #888; padding: 6px 12px; border-radius: 6px; font-size: 12px; }
+    .btn-ghost:hover { border-color: #555; color: #ccc; }
+    .pulse { animation: pulse 1.5s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+    .forge-glow { box-shadow: 0 0 20px rgba(240, 148, 50, 0.15); }
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 100; }
+    .modal { background: #1a1a1a; border: 1px solid #333; border-radius: 12px; padding: 24px; width: 90%; max-width: 560px; max-height: 90vh; overflow-y: auto; }
+    #splash { position: fixed; inset: 0; background: #0f0f0f; display: flex; align-items: center; justify-content: center; z-index: 200; transition: opacity 1s ease-out; }
+    #splash.fade { opacity: 0; pointer-events: none; }
+    .splash-text { font-size: 16px; color: #f09432; max-width: 520px; text-align: center; line-height: 1.8; font-style: italic; }
+    .splash-ref { font-size: 11px; color: #666; margin-top: 16px; font-style: normal; }
+  </style>
+</head>
+<body class="min-h-screen p-6">
+  <div id="splash">
+    <div>
+      <p class="splash-text" id="splash-verse">Loading…</p>
+      <p class="splash-ref" id="splash-ref"></p>
+      <p class="text-xs text-gray-700 text-center mt-4">— Proverbs —</p>
+    </div>
+  </div>
+
+  <header class="mb-8">
+    <div class="flex items-center gap-3 mb-2">
+      <span class="text-3xl">⚒️</span>
+      <h1 class="text-2xl font-bold text-forge-400">Tool Forge</h1>
+      <span class="text-xs text-gray-600 bg-forge-950/30 px-2 py-0.5 rounded">MCP Bridge Dashboard</span>
+      <div class="flex-1"></div>
+      <button class="btn-primary" onclick="showNewToolModal()">+ New Tool</button>
+    </div>
+    <p class="text-gray-600 text-sm mono">bridge → 127.0.0.1:3100</p>
+  </header>
+
+  <div id="health-bar" class="card mb-6 forge-glow">
+    <div class="card-header">Server Health</div>
+    <div id="health-content" class="p-4 flex gap-3 flex-wrap">
+      <div class="text-gray-600 text-sm pulse">Connecting to bridge...</div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="lg:col-span-2">
+      <div class="card mb-6">
+        <div class="card-header">
+          <span>Tool Catalog</span>
+          <span id="tool-count" class="text-forge-400">—</span>
+        </div>
+        <div class="p-3">
+          <input id="tool-search" placeholder="Search tools..." class="mb-3" oninput="renderTools()">
+        </div>
+        <div id="tool-list" class="px-3 pb-3 space-y-2 max-h-[500px] overflow-y-auto"></div>
+      </div>
+    </div>
+
+    <div class="space-y-6">
+      <div class="card">
+        <div class="card-header">Tool Tester</div>
+        <div class="p-4 space-y-3">
+          <select id="tester-tool" onchange="onToolSelect()">
+            <option value="">Select a tool...</option>
+          </select>
+          <div id="tester-params"></div>
+          <button class="btn-primary w-full" onclick="executeTool()">Execute</button>
+          <div id="tester-result" class="hidden mt-3">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs text-gray-500">Result</span>
+              <button class="btn-ghost text-xs" onclick="clearResult()">Clear</button>
+            </div>
+            <pre class="json" id="tester-output"></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <span>Activity</span>
+          <button class="btn-ghost text-xs" onclick="clearActivity()">Clear</button>
+        </div>
+        <div id="activity-log" class="p-4 max-h-[300px] overflow-y-auto space-y-2">
+          <div class="text-gray-600 text-xs">No activity yet</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="tool-modal" class="modal-overlay" style="display:none" onclick="if(event.target===this)hideToolModal()">
+    <div class="modal">
+      <div class="flex items-center justify-between mb-4">
+        <h2 id="modal-title" class="text-lg font-bold text-forge-400">New Custom Tool</h2>
+        <button class="btn-ghost text-xs" onclick="hideToolModal()">X</button>
+      </div>
+      <div class="space-y-3">
+        <div>
+          <label class="text-xs text-gray-500 block mb-1">Name <span class="text-red-400">*</span></label>
+          <div class="flex items-center gap-1">
+            <span class="text-xs text-gray-600">custom__</span>
+            <input id="ct-name" placeholder="my_tool" class="flex-1">
+          </div>
+        </div>
+        <div>
+          <label class="text-xs text-gray-500 block mb-1">Description</label>
+          <input id="ct-desc" placeholder="What this tool does...">
+        </div>
+        <div>
+          <label class="text-xs text-gray-500 block mb-1">Command <span class="text-red-400">*</span></label>
+          <textarea id="ct-cmd" rows="3" placeholder="echo Hello ${name}" class="resize-none"></textarea>
+          <p class="text-xs text-gray-700 mt-1">Use ${param_name} for arguments</p>
+        </div>
+        <div>
+          <label class="text-xs text-gray-500 block mb-1">Parameters (JSON Schema)</label>
+          <textarea id="ct-schema" rows="4" placeholder='{"type":"object","properties":{"name":{"type":"string"}},"required":["name"]}' class="resize-none mono"></textarea>
+        </div>
+        <div class="flex gap-2 pt-2">
+          <button class="btn-primary flex-1" onclick="saveTool()">Save</button>
+          <button class="btn-ghost flex-1" onclick="hideToolModal()">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const BRIDGE = 'http://127.0.0.1:3100';
+    let tools = [];
+    let activity = JSON.parse(localStorage.getItem('tf_activity') || '[]');
+    let editingOriginalName = '';
+
+    const PROVERBS = [
+      { text: "Trust in the LORD with all your heart, and do not lean on your own understanding.", ref: "Proverbs 3:5" },
+      { text: "Commit your work to the LORD, and your plans will be established.", ref: "Proverbs 16:3" },
+      { text: "The fear of the LORD is the beginning of knowledge; fools despise wisdom and instruction.", ref: "Proverbs 1:7" },
+      { text: "Iron sharpens iron, and one man sharpens another.", ref: "Proverbs 27:17" },
+      { text: "The heart of man plans his way, but the LORD establishes his steps.", ref: "Proverbs 16:9" },
+      { text: "A good name is to be chosen rather than great riches, and favor is better than silver or gold.", ref: "Proverbs 22:1" },
+      { text: "Whoever is slow to anger is better than the mighty, and he who rules his spirit than he who takes a city.", ref: "Proverbs 16:32" },
+      { text: "By wisdom a house is built, and by understanding it is established.", ref: "Proverbs 24:3" },
+      { text: "Anxiety in a man's heart weighs him down, but a good word makes him glad.", ref: "Proverbs 12:25" },
+      { text: "Let the wise hear and increase in learning, and the one who understands obtain guidance.", ref: "Proverbs 1:5" },
+      { text: "The blessing of the LORD makes rich, and he adds no sorrow with it.", ref: "Proverbs 10:22" },
+    ];
+    const v = PROVERBS[Math.floor(Math.random() * PROVERBS.length)];
+    document.getElementById("splash-verse").textContent = "\u201C" + v.text + "\u201D";
+    document.getElementById("splash-ref").textContent = "\u2014 " + v.ref;
+    setTimeout(() => document.getElementById("splash").classList.add("fade"), 3000);
+    setTimeout(() => document.getElementById("splash").remove(), 4000);
+
+    async function loadHealth() {
+      try {
+        const r = await fetch(BRIDGE + "/health");
+        const h = await r.json();
+        const el = document.getElementById("health-content");
+        const servers = h.servers || {};
+        let html = '<div class="flex items-center gap-2 px-3 py-2 rounded" style="background:#111"><span class="text-xs text-gray-500">STATUS</span><span class="text-sm font-semibold ' + (h.status === "ok" ? "text-green-400" : "text-yellow-400") + '">' + h.status.toUpperCase() + "</span></div>";
+        for (const [name, status] of Object.entries(servers)) {
+          const cls = status === "connected" ? "text-green-400" : status === "error" ? "text-red-400" : "text-yellow-400";
+          const dot = status === "connected" ? "\uD83D\uDFE2" : status === "error" ? "\uD83D\uDD34" : "\uD83D\uDFE1";
+          html += '<div class="flex items-center gap-2 px-3 py-2 rounded" style="background:#111"><span>' + dot + '</span><span class="text-sm font-medium">' + name + '</span><span class="text-xs ' + cls + '">' + status + "</span></div>";
+        }
+        el.innerHTML = html;
+      } catch (e) {
+        document.getElementById("health-content").innerHTML = '<div class="text-red-400 text-sm">' + String.fromCodePoint(0x26A0) + ' Bridge not reachable at ' + BRIDGE + "</div>";
+      }
+    }
+
+    async function loadTools() {
+      try {
+        const r = await fetch(BRIDGE + "/tools");
+        const d = await r.json();
+        tools = d.tools || [];
+        document.getElementById("tool-count").textContent = tools.length + " tools";
+        renderTools();
+        renderToolSelect();
+      } catch (e) {
+        document.getElementById("tool-list").innerHTML = '<div class="text-red-400 text-sm p-4">Cannot load tools</div>';
+      }
+    }
+
+    function renderTools() {
+      const q = (document.getElementById("tool-search").value || "").toLowerCase();
+      const filtered = tools.filter(t => t.name.toLowerCase().includes(q) || (t.description || "").toLowerCase().includes(q));
+      const el = document.getElementById("tool-list");
+      if (filtered.length === 0) { el.innerHTML = '<div class="text-gray-600 text-sm p-4">No tools match</div>'; return; }
+      el.innerHTML = filtered.map(t => {
+        const isCustom = t.server === "custom";
+        const serverBadge = t.server === "builtin" ? '<span class="text-xs px-1.5 py-0.5 rounded" style="background:#1e1e1e;color:#f09432">builtin</span>' : isCustom ? '<span class="text-xs px-1.5 py-0.5 rounded" style="background:#1e1e1e;color:#a78bfa">custom</span>' : '<span class="text-xs px-1.5 py-0.5 rounded" style="background:#1e1e1e;color:#60a5fa">' + t.server + "</span>";
+        const actions = isCustom ? '<button class="btn-edit" onclick="event.stopPropagation();editTool(\'' + t.name + '\')" title="Edit">' + String.fromCodePoint(0x270E) + '</button><button class="btn-danger" onclick="event.stopPropagation();deleteTool(\'' + t.name + '\')" title="Delete">' + String.fromCodePoint(0x1F5D1) + "</button>" : "";
+        return '<div class="p-3 rounded" style="background:#141414;border:1px solid #222"><div class="flex items-center justify-between mb-1"><span class="text-sm font-medium text-forge-400 mono">' + t.name + '</span><div class="flex items-center gap-2">' + serverBadge + actions + '</div></div><p class="text-xs text-gray-500">' + (t.description || "No description") + "</p></div>";
+      }).join("");
+    }
+
+    function renderToolSelect() {
+      document.getElementById("tester-tool").innerHTML = '<option value="">Select a tool...</option>' + tools.map(t => '<option value="' + t.name + '">' + t.name + "</option>").join("");
+    }
+
+    function onToolSelect() {
+      const name = document.getElementById("tester-tool").value;
+      const tool = tools.find(t => t.name === name);
+      const el = document.getElementById("tester-params");
+      if (!tool || !tool.inputSchema || !tool.inputSchema.properties || Object.keys(tool.inputSchema.properties).length === 0) {
+        el.innerHTML = '<p class="text-xs text-gray-600">No parameters required</p>'; return;
+      }
+      const props = tool.inputSchema.properties;
+      const required = tool.inputSchema.required || [];
+      el.innerHTML = Object.entries(props).map(([key, prop]) => {
+        const req = required.includes(key) ? ' <span class="text-red-400">*</span>' : "";
+        return '<div class="mb-2"><label class="text-xs text-gray-500 block mb-1">' + key + req + ' <span class="text-gray-700">' + (prop.type || "string") + '</span></label><input id="param-' + key + '" placeholder="' + (prop.description || "") + '"></div>';
+      }).join("");
+      document.getElementById("tester-result").classList.add("hidden");
+    }
+
+    async function executeTool() {
+      const name = document.getElementById("tester-tool").value;
+      if (!name) return;
+      const tool = tools.find(t => t.name === name);
+      const args = {};
+      if (tool && tool.inputSchema && tool.inputSchema.properties) {
+        for (const key of Object.keys(tool.inputSchema.properties)) {
+          const val = document.getElementById("param-" + key)?.value;
+          if (val) args[key] = val;
+        }
+      }
+      const start = Date.now();
+      document.getElementById("tester-output").textContent = "Executing...";
+      document.getElementById("tester-result").classList.remove("hidden");
+      try {
+        const r = await fetch(BRIDGE + "/call", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name, arguments: args }) });
+        const d = await r.json();
+        const elapsed = Date.now() - start;
+        const resultText = d.content?.[0]?.text || JSON.stringify(d, null, 2);
+        document.getElementById("tester-output").textContent = resultText;
+        logActivity({ tool: name, args, result: resultText.substring(0, 500), ok: !d.isError, ms: elapsed });
+      } catch (e) {
+        document.getElementById("tester-output").textContent = "Error: " + e.message;
+        logActivity({ tool: name, args, result: "Error: " + e.message, ok: false, ms: Date.now() - start });
+      }
+    }
+
+    function clearResult() { document.getElementById("tester-result").classList.add("hidden"); }
+
+    function logActivity(entry) {
+      entry.time = new Date().toISOString();
+      activity.unshift(entry);
+      if (activity.length > 100) activity = activity.slice(0, 100);
+      localStorage.setItem("tf_activity", JSON.stringify(activity));
+      renderActivity();
+    }
+
+    function renderActivity() {
+      const el = document.getElementById("activity-log");
+      if (activity.length === 0) { el.innerHTML = '<div class="text-gray-600 text-xs">No activity yet</div>'; return; }
+      el.innerHTML = activity.slice(0, 20).map(a => {
+        const okCls = a.ok ? "text-green-400" : "text-red-400";
+        const time = a.time ? new Date(a.time).toLocaleTimeString() : "";
+        return '<div class="flex items-start gap-2 text-xs" style="border-bottom:1px solid #1a1a1a;padding-bottom:6px"><span class="' + okCls + ' mt-0.5">' + (a.ok ? "\u2713" : "\u2717") + '</span><div class="flex-1"><span class="text-forge-400 font-medium">' + a.tool + '</span><span class="text-gray-600 ml-2">' + a.ms + 'ms</span><span class="text-gray-700 float-right">' + time + "</span></div></div>";
+      }).join("");
+    }
+
+    function clearActivity() { activity = []; localStorage.removeItem("tf_activity"); renderActivity(); }
+
+    function showNewToolModal() {
+      editingOriginalName = "";
+      document.getElementById("modal-title").textContent = "New Custom Tool";
+      document.getElementById("ct-name").value = "";
+      document.getElementById("ct-desc").value = "";
+      document.getElementById("ct-cmd").value = "";
+      document.getElementById("ct-schema").value = "";
+      document.getElementById("tool-modal").style.display = "flex";
+    }
+
+    function editTool(name) {
+      const tool = tools.find(t => t.name === name);
+      if (!tool) return;
+      editingOriginalName = name;
+      document.getElementById("modal-title").textContent = "Edit Custom Tool";
+      document.getElementById("ct-name").value = name.replace(/^custom__/, "");
+      document.getElementById("ct-desc").value = tool.description || "";
+      document.getElementById("ct-cmd").value = tool.command || "";
+      document.getElementById("ct-schema").value = JSON.stringify(tool.inputSchema || {}, null, 2);
+      document.getElementById("tool-modal").style.display = "flex";
+    }
+
+    function hideToolModal() { document.getElementById("tool-modal").style.display = "none"; }
+
+    async function saveTool() {
+      const rawName = document.getElementById("ct-name").value.trim();
+      if (!rawName) return alert("Name is required");
+      const cmd = document.getElementById("ct-cmd").value.trim();
+      if (!cmd) return alert("Command is required");
+      const name = "custom__" + rawName;
+      let schema = {};
+      const schemaRaw = document.getElementById("ct-schema").value.trim();
+      if (schemaRaw) { try { schema = JSON.parse(schemaRaw); } catch(e) { return alert("Invalid JSON in schema"); } }
+      if (editingOriginalName && editingOriginalName !== name) {
+        await fetch(BRIDGE + "/custom-tools/" + encodeURIComponent(editingOriginalName), { method: "DELETE" });
+      }
+      try {
+        const r = await fetch(BRIDGE + "/custom-tools", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name, description: document.getElementById("ct-desc").value.trim(), command: cmd, inputSchema: schema }) });
+        const d = await r.json();
+        if (d.ok) { hideToolModal(); loadTools(); } else { alert("Failed: " + (d.error || "unknown")); }
+      } catch (e) { alert("Error: " + e.message); }
+    }
+
+    async function deleteTool(name) {
+      if (!confirm("Delete " + name + "?")) return;
+      try { await fetch(BRIDGE + "/custom-tools/" + encodeURIComponent(name), { method: "DELETE" }); loadTools(); } catch (e) { alert("Error: " + e.message); }
+    }
+
+    loadHealth();
+    loadTools();
+    renderActivity();
+    setInterval(loadHealth, 10000);
+  </script>
+</body>
+</html>
