@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Farmstead Boxes — Local Meat Delivery to Your Door</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={theme:{extend:{colors:{farm:{50:'#F7F3EE',100:'#EDE4D5',400:'#C17F59',500:'#A0522D',600:'#8B4513',700:'#6B3410',800:'#4A2208',900:'#2D1404'},cream:'#FDFBF7',bark:'#5C4033',rust:'#C17F59'},fontFamily:{display:['Georgia','Times New Roman','serif']}}}}</script>
+<style>.hero-bg{background:linear-gradient(rgba(0,0,0,0.35),rgba(0,0,0,0.5)),url('https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?w=1200&q=80') center/cover no-repeat}.box-card:hover{transform:translateY(-3px);box-shadow:0 12px 30px rgba(0,0,0,0.12)}@media(max-width:640px){.box-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;scroll-snap-type:x mandatory}.box-card{scroll-snap-align:start;min-width:260px}}</style>
+</head>
+<body class="bg-cream text-bark font-sans antialiased">
+
+<header class="hero-bg min-h-[70vh] flex items-center justify-center text-center px-4">
+  <div class="max-w-2xl">
+    <p class="text-farm-200 uppercase tracking-widest text-sm mb-3">Simple Pleasure Farm LLC</p>
+    <h1 class="text-4xl md:text-7xl font-display text-white mb-4 leading-tight">Farmstead Boxes</h1>
+    <p class="text-lg md:text-xl text-farm-100 mb-6">Local Meat, Delivered to Your Doorstep — Adams County & Central MD</p>
+    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+      <a href="#boxes" class="bg-farm-500 hover:bg-farm-600 text-white px-8 py-3 rounded-full font-semibold text-lg transition">Shop Boxes</a>
+      <a href="#how" class="bg-white/90 hover:bg-white text-farm-700 px-8 py-3 rounded-full font-semibold text-lg transition">How It Works</a>
+    </div>
+  </div>
+</header>
+
+<section class="py-16 md:py-24 px-4 max-w-4xl mx-auto">
+  <div class="flex flex-col md:flex-row gap-10 items-center">
+    <div class="md:w-1/2">
+      <img src="https://images.unsplash.com/photo-1550583724-b2692b85b150?w=600&q=80" alt="Farmstead Box delivery" class="rounded-2xl shadow-lg w-full h-80 object-cover">
+    </div>
+    <div class="md:w-1/2">
+      <span class="text-farm-500 font-semibold tracking-wide uppercase text-sm">Our Story</span>
+      <h2 class="text-3xl md:text-4xl font-display text-farm-700 mt-2 mb-6">Know your farmer. Love your food.</h2>
+      <p class="text-gray-600 leading-relaxed mb-4">Farmstead Boxes was born from a simple idea: the best meat comes from people you know. We partner with local farms across Adams County and Central Pennsylvania to bring you pasture-raised beef, pork, and chicken — plus handmade cheeses, jams, and more.</p>
+      <p class="text-gray-600 leading-relaxed mb-4">Every box is packed frozen, delivered in a recyclable cooler, and guaranteed for 12 hours from drop-off. Free delivery Wednesdays to Adams County and Hanover.</p>
+      <p class="text-gray-500 italic">— Stan & the Farmstead Family</p>
+    </div>
+  </div>
+</section>
+
+<section id="boxes" class="py-16 md:py-24 bg-farm-50">
+  <div class="max-w-5xl mx-auto px-4">
+    <div class="text-center mb-12">
+      <span class="text-farm-500 font-semibold tracking-wide uppercase text-sm">Choose Your Box</span>
+      <h2 class="text-3xl md:text-4xl font-display text-farm-700 mt-2">Subscription Boxes</h2>
+      <p class="text-gray-500 mt-2">Free delivery Wednesdays. $99 minimum. Order by Tuesday noon.</p>
+    </div>
+    <div class="box-scroll flex gap-6 pb-4 md:grid md:grid-cols-3">
+
+      <div class="box-card bg-white rounded-2xl p-8 shadow-sm transition flex-shrink-0 text-center">
+        <div class="text-5xl mb-4">🥩</div>
+        <h3 class="font-bold text-2xl font-display text-farm-700 mb-1">The Griller</h3>
+        <p class="text-farm-500 font-bold mb-4">$129/month</p>
+        <ul class="text-gray-500 text-sm space-y-2 mb-6 text-left">
+          <li>• 4 ribeye steaks (10 oz)</li>
+          <li>• 2 lbs ground beef (85/15)</li>
+          <li>• 1 pack beef bacon (brisket)</li>
+          <li>• 1 lb sausage links</li>
+          <li>• 1 dozen farm eggs</li>
+        </ul>
+        <button onclick="document.getElementById('preview-modal').classList.remove('hidden')" class="w-full bg-farm-500 hover:bg-farm-600 text-white px-6 py-3 rounded-full font-semibold transition">Subscribe 🔒</button>
+      </div>
+
+      <div class="box-card bg-white rounded-2xl p-8 shadow-sm transition flex-shrink-0 text-center border-2 border-farm-400 relative">
+        <span class="absolute -top-3 left-1/2 -translate-x-1/2 bg-farm-500 text-white text-xs px-3 py-1 rounded-full font-bold">MOST POPULAR</span>
+        <div class="text-5xl mb-4">🍖</div>
+        <h3 class="font-bold text-2xl font-display text-farm-700 mb-1">The Family Table</h3>
+        <p class="text-farm-500 font-bold mb-4">$199/month</p>
+        <ul class="text-gray-500 text-sm space-y-2 mb-6 text-left">
+          <li>• 6 ribeye or NY strip steaks</li>
+          <li>• 3 lbs ground beef (85/15)</li>
+          <li>• 2 lbs beef bacon (brisket)</li>
+          <li>• 1 whole chicken (4-5 lbs)</li>
+          <li>• 2 lbs sausage (assorted)</li>
+          <li>• 2 dozen farm eggs</li>
+          <li>• 1 jar local jam or honey</li>
+        </ul>
+        <button onclick="document.getElementById('preview-modal').classList.remove('hidden')" class="w-full bg-farm-500 hover:bg-farm-600 text-white px-6 py-3 rounded-full font-semibold transition">Subscribe 🔒</button>
+      </div>
+
+      <div class="box-card bg-white rounded-2xl p-8 shadow-sm transition flex-shrink-0 text-center">
+        <div class="text-5xl mb-4">🧊</div>
+        <h3 class="font-bold text-2xl font-display text-farm-700 mb-1">The Stockpile</h3>
+        <p class="text-farm-500 font-bold mb-4">$349/month</p>
+        <ul class="text-gray-500 text-sm space-y-2 mb-6 text-left">
+          <li>• Everything in Family Table</li>
+          <li>• PLUS 4 lbs pork chops</li>
+          <li>• 2 whole chickens</li>
+          <li>• 1 brisket flat (5-6 lbs)</li>
+          <li>• 1 artisan cheese block</li>
+          <li>• 3 jars jam/honey/salsa</li>
+          <li>• + 2 lbs bonus cut monthly</li>
+        </ul>
+        <button onclick="document.getElementById('preview-modal').classList.remove('hidden')" class="w-full bg-farm-500 hover:bg-farm-600 text-white px-6 py-3 rounded-full font-semibold transition">Subscribe 🔒</button>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section id="how" class="py-16 md:py-24 px-4 max-w-4xl mx-auto">
+  <div class="text-center mb-12">
+    <span class="text-farm-500 font-semibold tracking-wide uppercase text-sm">How It Works</span>
+    <h2 class="text-3xl md:text-4xl font-display text-farm-700 mt-2">Three Easy Steps</h2>
+  </div>
+  <div class="grid md:grid-cols-3 gap-8">
+    <div class="text-center">
+      <div class="bg-farm-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">1</div>
+      <h3 class="font-bold text-lg text-farm-700 mb-2">Pick Your Box</h3>
+      <p class="text-gray-500 text-sm">Choose a subscription size that fits your family. The Griller, Family Table, or Stockpile.</p>
+    </div>
+    <div class="text-center">
+      <div class="bg-farm-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">2</div>
+      <h3 class="font-bold text-lg text-farm-700 mb-2">Order by Tuesday Noon</h3>
+      <p class="text-gray-500 text-sm">Orders placed by Tuesday at noon ship that week. Delivery every Wednesday.</p>
+    </div>
+    <div class="text-center">
+      <div class="bg-farm-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">3</div>
+      <h3 class="font-bold text-lg text-farm-700 mb-2">Find It at Your Door</h3>
+      <p class="text-gray-500 text-sm">Frozen, packed in a recyclable cooler. Guaranteed 12 hours from drop-off. No need to be home.</p>
+    </div>
+  </div>
+</section>
+
+<section class="py-16 md:py-24 bg-farm-50">
+  <div class="max-w-4xl mx-auto px-4">
+    <div class="text-center mb-10">
+      <span class="text-farm-500 font-semibold tracking-wide uppercase text-sm">What Customers Say</span>
+      <h2 class="text-3xl md:text-4xl font-display text-farm-700 mt-2">Reviews</h2>
+    </div>
+    <div class="grid md:grid-cols-2 gap-6">
+      <div class="bg-white rounded-xl p-6 shadow-sm"><div class="text-rust text-lg mb-2">★★★★★</div><p class="text-gray-600 mb-3">"The Family Table box changed how we eat. The beef bacon is unreal — thick-cut brisket, completely different from anything at the grocery store. Free delivery on Wednesdays makes it effortless."</p><p class="font-semibold text-farm-700">— Mark & Jen T., Hanover</p></div>
+      <div class="bg-white rounded-xl p-6 shadow-sm"><div class="text-rust text-lg mb-2">★★★★★</div><p class="text-gray-600 mb-3">"I was skeptical about meat delivery but the cooler packaging is genius. Still frozen solid when I get home at 6 PM. The quality is night and day compared to supermarket meat. Worth every penny."</p><p class="font-semibold text-farm-700">— Sarah K., Gettysburg</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="py-16 md:py-24 bg-farm-700 text-white text-center px-4">
+  <h2 class="text-3xl md:text-5xl font-display mb-4">Ready to Taste the Difference?</h2>
+  <p class="text-farm-100 text-lg mb-8 max-w-lg mx-auto">Free delivery to Adams County & Hanover every Wednesday. $99 minimum. Order by Tuesday noon.</p>
+  <button onclick="document.getElementById('preview-modal').classList.remove('hidden')" class="bg-farm-400 hover:bg-farm-500 text-farm-900 px-10 py-4 rounded-full font-bold text-xl transition shadow-lg">Start Your Subscription 🔒</button>
+</section>
+
+<div id="preview-modal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4"><div class="bg-white rounded-2xl max-w-md w-full p-8 text-center shadow-2xl"><div class="text-5xl mb-4">🔒</div><h3 class="text-2xl font-display text-farm-700 mb-2">Online Ordering</h3><p class="text-gray-500 mb-6">Available with a full subscription. This is a preview.</p><button onclick="document.getElementById('preview-modal').classList.add('hidden')" class="bg-farm-500 hover:bg-farm-600 text-white px-6 py-2 rounded-full font-semibold transition">Got it</button></div></div>
+
+<footer class="py-8 px-4 text-center text-gray-400 text-sm border-t border-gray-200"><p class="mb-1">Preview built for <strong class="text-gray-500">Farmstead Boxes</strong>. Not yet live.</p><p>Powered by <a href="https://sg1-labs.us" class="text-farm-500 hover:underline">SG1 Labs</a> — Websites for local farms & food.</p></footer>
+
+</body>
+</html>

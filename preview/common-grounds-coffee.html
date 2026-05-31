@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Common Grounds — Coffee. Community. Gettysburg.</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={theme:{extend:{colors:{brew:{50:'#F5F0EB',100:'#EBE0D5',200:'#D4C4B0',400:'#A67B5B',500:'#8B6340',600:'#6B4D32',700:'#4A3320',800:'#2D1F12',900:'#1A110A'},cream:'#FCF9F5',bean:'#3C2415',foam:'#D4A574'},fontFamily:{display:['Georgia','serif'],sans:['system-ui','sans-serif']}}}};</script>
+<style>.hero-bg{background:linear-gradient(rgba(0,0,0,0.4),rgba(0,0,0,0.5)),url('https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=1200&q=80') center/cover no-repeat;}.drink-card:hover{transform:translateY(-2px)}</style>
+</head>
+<body class="bg-cream text-bean font-sans antialiased">
+
+<header class="hero-bg min-h-[65vh] flex items-center justify-center text-center px-4">
+  <div class="max-w-2xl">
+    <p class="text-brew-200 uppercase tracking-widest text-sm mb-3">Gettysburg Since 2016</p>
+    <h1 class="text-4xl md:text-7xl font-display text-white mb-4 leading-tight">Common Grounds</h1>
+    <p class="text-xl md:text-2xl text-brew-100 mb-6">Coffee. Community. Conversation.</p>
+    <div class="inline-block bg-white/10 backdrop-blur-sm rounded-full px-6 py-3 text-white text-sm">☕ Open Daily 6 AM – 8 PM | 17 Chambersburg Street</div>
+  </div>
+</header>
+
+<section class="py-16 md:py-24 px-4 max-w-4xl mx-auto">
+  <div class="flex flex-col md:flex-row gap-10 items-center">
+    <div class="md:w-1/2"><img src="https://images.unsplash.com/photo-1445116572660-236099ec97a0?w=600&q=80" alt="Coffee shop interior" class="rounded-2xl shadow-lg w-full h-80 object-cover"></div>
+    <div class="md:w-1/2">
+      <span class="text-foam font-semibold tracking-wide uppercase text-sm">Our Story</span>
+      <h2 class="text-3xl md:text-4xl font-display text-brew-700 mt-2 mb-6">A place where everyone knows your roast.</h2>
+      <p class="text-gray-600 leading-relaxed mb-4">Common Grounds opened in 2016 with a Chemex, a refurbished La Marzocco, and a belief that great coffee brings people together. We roast our beans weekly in a 5-kilo roaster right behind the bar.</p>
+      <p class="text-gray-600 leading-relaxed mb-4">Single-origin, direct-trade beans. Pour-overs, espresso, and house-made syrups. Open mic Wednesdays. Free Wi-Fi. Dogs welcome on the patio.</p>
+      <p class="text-gray-500 italic">— Jess & the Common Grounds crew</p>
+    </div>
+  </div>
+</section>
+
+<section class="py-16 md:py-24 bg-brew-50">
+  <div class="max-w-4xl mx-auto px-4">
+    <div class="text-center mb-12"><span class="text-foam font-semibold tracking-wide uppercase text-sm">The Menu</span><h2 class="text-3xl md:text-4xl font-display text-brew-700 mt-2">Coffee & Bites</h2></div>
+    <div class="space-y-1 max-w-2xl mx-auto">
+      <div class="border-b border-brew-200 py-4 flex justify-between items-baseline"><div><h3 class="font-bold text-lg text-brew-700">Pour-Over</h3><p class="text-gray-500 text-sm">Rotating single-origin. Today: Ethiopian Yirgacheffe</p></div><span class="text-foam font-bold">$4.50</span></div>
+      <div class="border-b border-brew-200 py-4 flex justify-between items-baseline"><div><h3 class="font-bold text-lg text-brew-700">Latte ⭐</h3><p class="text-gray-500 text-sm">Double espresso, steamed milk, latte art.</p></div><span class="text-foam font-bold">$5.00</span></div>
+      <div class="border-b border-brew-200 py-4 flex justify-between items-baseline"><div><h3 class="font-bold text-lg text-brew-700">Cortado</h3><p class="text-gray-500 text-sm">Equal parts espresso & steamed milk. 4 oz.</p></div><span class="text-foam font-bold">$4.00</span></div>
+      <div class="border-b border-brew-200 py-4 flex justify-between items-baseline"><div><h3 class="font-bold text-lg text-brew-700">Cold Brew</h3><p class="text-gray-500 text-sm">18-hour steep. Smooth, chocolatey.</p></div><span class="text-foam font-bold">$4.50</span></div>
+      <div class="border-b border-brew-200 py-4 flex justify-between items-baseline"><div><h3 class="font-bold text-lg text-brew-700">Chai Latte</h3><p class="text-gray-500 text-sm">House-made chai. Spicy & sweet.</p></div><span class="text-foam font-bold">$5.00</span></div>
+      <div class="border-b border-brew-200 py-4"><h3 class="font-bold text-lg text-brew-700 mb-2">Bites</h3><div class="space-y-1"><div class="flex justify-between text-gray-600"><span>Avocado Toast</span><span>$8</span></div><div class="flex justify-between text-gray-600"><span>Morning Bun</span><span>$4.50</span></div><div class="flex justify-between text-gray-600"><span>Yogurt + Granola</span><span>$7</span></div><div class="flex justify-between text-gray-600"><span>Quiche of the Day</span><span>$9</span></div></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="py-16 md:py-24 px-4 max-w-4xl mx-auto">
+  <div class="grid md:grid-cols-2 gap-10">
+    <div>
+      <span class="text-foam font-semibold tracking-wide uppercase text-sm">Hours & Location</span>
+      <h2 class="text-3xl font-display text-brew-700 mt-2 mb-6">Find Us</h2>
+      <div class="space-y-2 text-gray-600 text-lg">
+        <p class="flex justify-between"><span>Mon – Fri</span> <span>6 AM – 8 PM</span></p>
+        <p class="flex justify-between"><span>Saturday</span> <span>7 AM – 8 PM</span></p>
+        <p class="flex justify-between"><span>Sunday</span> <span>7 AM – 5 PM</span></p>
+      </div>
+      <div class="mt-6"><p class="font-semibold text-lg">📍 17 Chambersburg St, Gettysburg, PA</p><p class="mt-1">📞 (717) 555-BREW</p></div>
+      <div class="mt-4 bg-brew-50 rounded-xl p-4"><p class="text-brew-700 font-semibold text-sm">🎤 Open Mic Night:</p><p class="text-gray-500 text-sm mt-1">Every Wednesday at 7 PM. Sign up by 6:30. All levels welcome.</p></div>
+    </div>
+    <div class="rounded-2xl overflow-hidden shadow-lg" style="min-height:300px;"><iframe src="https://www.openstreetmap.org/export/embed.html?bbox=-77.2400,39.8250,-77.2200,39.8350&layer=mapnik&marker=39.8295,-77.2310" width="100%" height="300" style="border:0;" allowfullscreen loading="lazy"></iframe></div>
+  </div>
+</section>
+
+<section class="py-16 md:py-24 bg-brew-50"><div class="max-w-4xl mx-auto px-4"><div class="text-center mb-10"><span class="text-foam font-semibold tracking-wide uppercase text-sm">What People Say</span><h2 class="text-3xl md:text-4xl font-display text-brew-700 mt-2">Reviews</h2></div><div class="grid md:grid-cols-2 gap-6"><div class="bg-white rounded-xl p-6 shadow-sm"><div class="text-foam text-lg mb-2">★★★★★</div><p class="text-gray-600 mb-3">"Best pour-over in Adams County. Jess knows her beans. The Ethiopian Yirgacheffe is incredible — blueberry notes, clean finish. My remote office 3 days a week."</p><p class="font-semibold text-brew-700">— Tom W., Gettysburg</p></div><div class="bg-white rounded-xl p-6 shadow-sm"><div class="text-foam text-lg mb-2">★★★★★</div><p class="text-gray-600 mb-3">"Came for the coffee, stayed for the open mic. Wednesday nights here are the best-kept secret in Gettysburg. Great vibe, great people, great latte art."</p><p class="font-semibold text-brew-700">— Maria G., Biglerville</p></div></div></div></section>
+
+<section class="py-16 md:py-24 bg-brew-700 text-white text-center px-4">
+  <h2 class="text-3xl md:text-5xl font-display mb-4">See You Tomorrow Morning</h2>
+  <p class="text-brew-100 text-lg mb-8 max-w-lg mx-auto">Order ahead. Skip the line. Your drink ready when you walk in.</p>
+  <button onclick="document.getElementById('preview-modal').classList.remove('hidden')" class="bg-foam hover:bg-brew-400 text-brew-900 px-10 py-4 rounded-full font-bold text-xl transition shadow-lg">Order Ahead 🔒</button>
+</section>
+
+<div id="preview-modal" class="hidden fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4"><div class="bg-white rounded-2xl max-w-md w-full p-8 text-center shadow-2xl"><div class="text-5xl mb-4">🔒</div><h3 class="text-2xl font-display text-brew-700 mb-2">Online Ordering</h3><p class="text-gray-500 mb-6">Mobile ordering & pickup available with a full subscription. This is a preview.</p><button onclick="document.getElementById('preview-modal').classList.add('hidden')" class="bg-foam hover:bg-brew-400 text-brew-900 px-6 py-2 rounded-full font-semibold transition">Got it</button></div></div>
+
+<footer class="py-8 px-4 text-center text-gray-400 text-sm border-t border-gray-200"><p class="mb-1">Preview built for <strong class="text-gray-500">Common Grounds Coffee</strong>. Not yet live.</p><p>Powered by <a href="https://sg1-labs.us" class="text-foam hover:underline">SG1 Labs</a></p></footer>
+</body>
+</html>

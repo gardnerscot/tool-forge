@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Weikert's Egg Farm — Family-Raised Since 1834</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={theme:{extend:{colors:{farm:{50:'#FEFAE0',100:'#FAEDCD',200:'#E9D8A6',400:'#A7C957',500:'#6A994E',600:'#386641',700:'#2D4A22',800:'#1B3610',900:'#0F1F08'},egg:'#FEFAE0',barn:'#BC6C25',cream:'#FDFBF7',soil:'#5C4033'},fontFamily:{display:['Georgia','Times New Roman','serif']}}}}</script>
+<style>.hero-bg{background:linear-gradient(rgba(0,0,0,0.3),rgba(0,0,0,0.5)),url('https://images.unsplash.com/photo-1516467508483-a7212febe31a?w=1200&q=80') center/cover no-repeat}.product-card:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,0,0,0.08)}@media(max-width:640px){.product-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;scroll-snap-type:x mandatory}.product-card{scroll-snap-align:start;min-width:220px}}</style>
+</head>
+<body class="bg-cream text-soil font-sans antialiased">
+
+<header class="hero-bg min-h-[65vh] flex items-center justify-center text-center px-4">
+  <div class="max-w-2xl">
+    <p class="text-farm-200 uppercase tracking-widest text-sm mb-3">Family Farm Since 1834</p>
+    <h1 class="text-4xl md:text-6xl font-display text-white mb-4 leading-tight">Weikert's Egg Farm</h1>
+    <p class="text-lg md:text-xl text-farm-100 mb-6">Free-Walking Eggs & Naturally Raised Beef — Gettysburg, PA</p>
+    <div class="inline-block bg-white/15 backdrop-blur-sm rounded-full px-6 py-3 text-white text-sm">
+      🥚 Farm Store Open Daily | 2559 Fairfield Road, Gettysburg
+    </div>
+  </div>
+</header>
+
+<section class="py-16 md:py-24 px-4 max-w-4xl mx-auto">
+  <div class="flex flex-col md:flex-row gap-10 items-center">
+    <div class="md:w-1/2">
+      <img src="https://images.unsplash.com/photo-1598966739654-5e9a4e4cf0b0?w=600&q=80" alt="Weikert family farm" class="rounded-2xl shadow-lg w-full h-80 object-cover">
+    </div>
+    <div class="md:w-1/2">
+      <span class="text-farm-500 font-semibold tracking-wide uppercase text-sm">Our Story</span>
+      <h2 class="text-3xl md:text-4xl font-display text-farm-700 mt-2 mb-6">Nine generations on this land.</h2>
+      <p class="text-gray-600 leading-relaxed mb-4">The Weikert family has been farming this land since 1834 — that's nine generations of sunrises, soil, and stewardship. We raise our hens free-walking (never caged) and our cattle naturally fed, without hormones, antibiotics, or shortcuts.</p>
+      <p class="text-gray-600 leading-relaxed mb-4">Our farm store is open daily. Come see where your food comes from — the eggs, the beef, and yes, the beef bacon made from brisket that everyone's talking about.</p>
+      <p class="text-gray-500 italic">— The Weikert Family</p>
+    </div>
+  </div>
+</section>
+
+<section class="py-16 md:py-24 bg-farm-50">
+  <div class="max-w-5xl mx-auto px-4">
+    <div class="text-center mb-12">
+      <span class="text-farm-500 font-semibold tracking-wide uppercase text-sm">What We Raise</span>
+      <h2 class="text-3xl md:text-4xl font-display text-farm-700 mt-2">Available at the Farm Store</h2>
+    </div>
+    <div class="product-scroll flex gap-6 pb-4 md:grid md:grid-cols-2 lg:grid-cols-3">
+
+      <div class="product-card bg-white rounded-xl p-6 shadow-sm transition flex-shrink-0">
+        <div class="text-4xl mb-3">🥚</div>
+        <h3 class="font-bold text-lg text-farm-700">Free-Walking Eggs</h3>
+        <p class="text-gray-500 text-sm mt-1">Cage-free hens, pasture-raised. Rich golden yolks.</p>
+        <p class="text-barn font-bold mt-3">$5.00/dozen</p>
+      </div>
+
+      <div class="product-card bg-white rounded-xl p-6 shadow-sm transition flex-shrink-0 border-2 border-barn/30">
+        <div class="text-4xl mb-3">🥓</div>
+        <h3 class="font-bold text-lg text-farm-700">Beef Bacon (Brisket)</h3>
+        <p class="text-gray-500 text-sm mt-1">Smoked brisket, sliced thick. Our signature item.</p>
+        <p class="text-barn font-bold mt-3">$12.00/lb</p>
+        <span class="inline-block bg-barn/10 text-barn text-xs px-2 py-1 rounded-full mt-2">⭐ Customer Favorite</span>
+      </div>
+
+      <div class="product-card bg-white rounded-xl p-6 shadow-sm transition flex-shrink-0">
+        <div class="text-4xl mb-3">🥩</div>
+        <h3 class="font-bold text-lg text-farm-700">Naturally Raised Beef</h3>
+        <p class="text-gray-500 text-sm mt-1">No hormones, no antibiotics. Cuts, steaks, roasts, ground.</p>
+        <p class="text-barn font-bold mt-3">Various cuts</p>
+      </div>
+
+      <div class="product-card bg-white rounded-xl p-6 shadow-sm transition flex-shrink-0">
+        <div class="text-4xl mb-3">🐖</div>
+        <h3 class="font-bold text-lg text-farm-700">Pastured Pork</h3>
+        <p class="text-gray-500 text-sm mt-1">Chops, sausage, bacon. Heritage breed, outdoor raised.</p>
+        <p class="text-barn font-bold mt-3">Various cuts</p>
+      </div>
+
+      <div class="product-card bg-white rounded-xl p-6 shadow-sm transition flex-shrink-0">
+        <div class="text-4xl mb-3">🐔</div>
+        <h3 class="font-bold text-lg text-farm-700">Whole Chickens</h3>
+        <p class="text-gray-500 text-sm mt-1">Free-range, farm-raised. Fresh or frozen.</p>
+        <p class="text-barn font-bold mt-3">$5.00/lb</p>
+      </div>
+
+      <div class="product-card bg-white rounded-xl p-6 shadow-sm transition flex-shrink-0">
+        <div class="text-4xl mb-3">🧊</div>
+        <h3 class="font-bold text-lg text-farm-700">Bulk Beef Orders</h3>
+        <p class="text-gray-500 text-sm mt-1">Quarter, half, or whole. Custom cut & wrapped.</p>
+        <p class="text-barn font-bold mt-3">Inquire for pricing</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section class="py-16 md:py-24 px-4 max-w-4xl mx-auto">
+  <div class="text-center mb-10">
+    <span class="text-farm-500 font-semibold tracking-wide uppercase text-sm">Visit the Farm Store</span>
+    <h2 class="text-3xl md:text-4xl font-display text-farm-700 mt-2 mb-6">Hours & Location</h2>
+  </div>
+  <div class="grid md:grid-cols-2 gap-10">
+    <div>
+      <div class="space-y-2 text-gray-600 text-lg">
+        <p class="flex justify-between"><span>Monday – Friday</span> <span>8 AM – 6 PM</span></p>
+        <p class="flex justify-between"><span>Saturday</span> <span>8 AM – 4 PM</span></p>
+        <p class="flex justify-between"><span>Sunday</span> <span>Closed</span></p>
+      </div>
+      <div class="mt-6 text-gray-600">
+        <p class="font-semibold text-lg">📍 2559 Fairfield Road, Gettysburg, PA 17325</p>
+        <p class="mt-1">📞 (717) 334-1234</p>
+      </div>
+      <div class="mt-6 bg-farm-50 rounded-xl p-4">
+        <p class="text-farm-700 font-semibold text-sm">🥩 Beef Bacon Tip:</p>
+        <p class="text-gray-500 text-sm mt-1">Made from smoked brisket. Thick-cut, rich, and completely different from pork bacon. Fry it low and slow. You'll never go back.</p>
+      </div>
+    </div>
+    <div class="rounded-2xl overflow-hidden shadow-lg" style="min-height:300px;">
+      <iframe src="https://www.openstreetmap.org/export/embed.html?bbox=-77.2800,39.8200,-77.2100,39.8450&layer=mapnik&marker=39.8325,-77.2450" width="100%" height="300" style="border:0;" allowfullscreen loading="lazy"></iframe>
+    </div>
+  </div>
+</section>
+
+<section class="py-16 md:py-24 bg-farm-50">
+  <div class="max-w-4xl mx-auto px-4">
+    <div class="text-center mb-10">
+      <span class="text-farm-500 font-semibold tracking-wide uppercase text-sm">What Customers Say</span>
+      <h2 class="text-3xl md:text-4xl font-display text-farm-700 mt-2">Reviews</h2>
+    </div>
+    <div class="grid md:grid-cols-2 gap-6">
+      <div class="bg-white rounded-xl p-6 shadow-sm">
+        <div class="text-barn text-lg mb-2">★★★★★</div>
+        <p class="text-gray-600 mb-3">"The beef bacon is unlike anything I've ever had. Thick, smoky, and made from brisket. I drive 30 minutes every weekend just for this."</p>
+        <p class="font-semibold text-farm-700">— Dan M., Gettysburg</p>
+      </div>
+      <div class="bg-white rounded-xl p-6 shadow-sm">
+        <div class="text-barn text-lg mb-2">★★★★★</div>
+        <p class="text-gray-600 mb-3">"Best eggs in Adams County — the yolks are actually orange, not pale yellow. You can taste the difference when hens get to walk around outside."</p>
+        <p class="font-semibold text-farm-700">— Lisa R., Biglerville</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="py-16 md:py-24 bg-farm-600 text-white text-center px-4">
+  <h2 class="text-3xl md:text-5xl font-display mb-4">Stop By the Farm Store</h2>
+  <p class="text-farm-100 text-lg mb-8 max-w-lg mx-auto">2559 Fairfield Road, Gettysburg. Open Monday–Saturday. Come say hello — the beef bacon is worth the drive.</p>
+  <a href="https://www.google.com/maps/dir//2559+Fairfield+Road+Gettysburg+PA" target="_blank" class="inline-block bg-white hover:bg-farm-50 text-farm-700 px-8 py-3 rounded-full font-semibold text-lg transition shadow-md">Get Directions 🧭</a>
+</section>
+
+<footer class="py-8 px-4 text-center text-gray-400 text-sm border-t border-gray-200">
+  <p class="mb-1">Preview built for <strong class="text-gray-500">Weikert's Egg Farm</strong>. Not yet live.</p>
+  <p>Powered by <a href="https://sg1-labs.us" class="text-farm-500 hover:underline">SG1 Labs</a> — Websites for local farms & food.</p>
+</footer>
+
+</body>
+</html>

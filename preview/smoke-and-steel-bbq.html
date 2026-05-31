@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smoke &amp; Steel BBQ — Find Us on the Road</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:#2D2D2D;color:#fff;line-height:1.6}
+.hero{min-height:80vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:2rem 1rem;position:relative;background:linear-gradient(rgba(0,0,0,0.5),rgba(0,0,0,0.65)),url('https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=1200&q=80') center/cover no-repeat}
+.open-badge{position:absolute;top:1rem;right:1rem;background:#E85D04;color:#fff;padding:.5rem 1rem;border-radius:9999px;font-size:.875rem;font-weight:700;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+.container{max-width:900px;margin:0 auto;padding:0 1rem}
+.hero h1{font-size:clamp(2.5rem,8vw,6rem);font-family:Impact,'Arial Black',sans-serif;line-height:1;text-transform:uppercase;letter-spacing:-.02em;margin-bottom:.75rem}
+.hero .tagline{font-size:clamp(1.2rem,3vw,1.75rem);color:#EBE0D5;margin-bottom:1.5rem}
+.location-card{display:inline-block;background:rgba(0,0,0,0.4);backdrop-filter:blur(8px);border-radius:1rem;padding:1rem 1.5rem;margin-bottom:2rem}
+.location-card .today{color:#E85D04;font-weight:700;font-size:1.1rem}
+.location-card .hours{color:#c0b8a8;font-size:.875rem;margin-top:.25rem}
+.btn{display:inline-block;padding:.75rem 2rem;border-radius:9999px;font-size:1.1rem;font-weight:700;text-decoration:none;transition:background .2s;margin:.25rem}
+.btn-primary{background:#E85D04;color:#fff}.btn-primary:hover{background:#D4743A}
+.btn-ghost{background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.3);backdrop-filter:blur(8px)}.btn-ghost:hover{background:rgba(255,255,255,0.2)}
+.sms-bar{background:#000;text-align:center;padding:2rem 1rem;border-bottom:1px solid #4A1A04}
+.sms-bar p{color:#c0b8a8;font-size:.875rem}
+.sms-bar .ember{color:#E85D04;font-weight:700}
+.section{padding:4rem 1rem}
+.section-title{text-align:center;margin-bottom:3rem}
+.section-title .label{color:#E85D04;font-weight:600;text-transform:uppercase;letter-spacing:.1em;font-size:.8rem}
+.section-title h2{font-size:clamp(2rem,5vw,3rem);font-family:Impact,'Arial Black',sans-serif;text-transform:uppercase;letter-spacing:-.01em;margin-top:.5rem}
+.menu-item{border-bottom:1px solid #4A1A04;padding:1.25rem 0}
+.menu-item .row{display:flex;justify-content:space-between;align-items:baseline}
+.menu-item h3{font-size:1.25rem;font-weight:700}
+.menu-item .price{color:#E85D04;font-weight:700;font-size:1.1rem}
+.menu-item .desc{color:#9ca3af;font-size:.875rem;margin-top:.25rem}
+.schedule-item{background:rgba(74,26,4,0.5);border-radius:.75rem;padding:1.25rem;margin-bottom:.75rem}
+.schedule-item.featured{box-shadow:inset 0 0 0 1px #E85D04}
+.schedule-item .day{color:#E85D04;font-weight:700;margin-right:.5rem}
+.schedule-item .detail{color:#c0b8a8}
+.reviews{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}
+@media(max-width:640px){.reviews{grid-template-columns:1fr}}
+.review-card{background:#2D0F02;border-radius:.75rem;padding:1.5rem}
+.review-card .stars{color:#E85D04;font-size:1.1rem;margin-bottom:.5rem}
+.review-card p{color:#EBE0D5;margin-bottom:.75rem}
+.review-card .author{font-weight:700;color:#fff}
+.cta{background:#2D0F02;text-align:center;padding:4rem 1rem}
+.cta h2{font-size:clamp(1.8rem,4vw,2.5rem);font-family:Impact,'Arial Black',sans-serif;text-transform:uppercase;margin-bottom:1rem}
+.cta p{color:#c0b8a8;font-size:1.1rem;margin-bottom:2rem;max-width:500px;margin-left:auto;margin-right:auto}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:50;align-items:center;justify-content:center;padding:1rem}
+.modal.show{display:flex}
+.modal-box{background:#2D0F02;border-radius:1rem;max-width:28rem;width:100%;padding:2rem;text-align:center;border:1px solid #4A1A04}
+.modal-box h3{font-size:1.5rem;font-family:Impact,'Arial Black',sans-serif;text-transform:uppercase;margin-bottom:.5rem}
+.modal-box p{color:#c0b8a8;margin-bottom:1.5rem}
+.modal-box button{background:#E85D04;color:#fff;border:0;padding:.5rem 1.5rem;border-radius:9999px;font-weight:700;cursor:pointer}
+footer{padding:2rem 1rem;text-align:center;color:#8b7d6b;font-size:.8rem;border-top:1px solid #4A1A04}
+footer a{color:#E85D04;text-decoration:none}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="open-badge">🔴 OPEN NOW</div>
+  <div style="max-width:720px">
+    <p style="color:#E85D04;text-transform:uppercase;letter-spacing:.1em;font-size:.85rem;font-weight:700;margin-bottom:.75rem">Gettysburg's Original BBQ Truck</p>
+    <h1>Smoke &amp; Steel</h1>
+    <p class="tagline">Texas-Style BBQ. Pennsylvania Pride.</p>
+    <div class="location-card">
+      <p class="today">📍 TODAY: Lincoln Square, Gettysburg</p>
+      <p class="hours">11 AM – 8 PM (or until sold out)</p>
+    </div>
+    <div>
+      <a href="#menu" class="btn btn-primary">See the Menu</a>
+      <a href="#schedule" class="btn btn-ghost">Weekly Schedule</a>
+    </div>
+  </div>
+</header>
+
+<section class="sms-bar">
+  <p>📱 Text <span class="ember">BBQ</span> to <span style="color:#fff;font-weight:700">(717) 555-SMOK</span> for today's location.</p>
+</section>
+
+<section id="menu" class="section" style="max-width:750px;margin:0 auto">
+  <div class="section-title">
+    <p class="label">What's Smoking</p>
+    <h2>The Menu</h2>
+    <p style="color:#c0b8a8;margin-top:.5rem">Everything smoked low &amp; slow over oak. 14-hour brisket. No shortcuts.</p>
+  </div>
+  <div class="menu-item"><div class="row"><h3>The Texan</h3><span class="price">$14</span></div><p class="desc">½ lb smoked brisket, pickled onions, jalapeños, Texas toast</p></div>
+  <div class="menu-item"><div class="row"><h3>The Carolinian ⭐</h3><span class="price">$13</span></div><p class="desc">Pulled pork, vinegar slaw, Carolina gold sauce, brioche bun</p></div>
+  <div class="menu-item"><div class="row"><h3>Beef Rib</h3><span class="price">$18</span></div><p class="desc">Single massive dino rib. 8-hour smoke. Served with pickles &amp; bread.</p></div>
+  <div class="menu-item"><div class="row"><h3>Smoked Wings (6)</h3><span class="price">$12</span></div><p class="desc">Dry-rubbed, smoked, then flash-fried. Choice of sauce.</p></div>
+  <div class="menu-item"><div class="row"><h3>Brisket Mac Attack</h3><span class="price">$10</span></div><p class="desc">Creamy mac &amp; cheese topped with chopped brisket &amp; crispy onions</p></div>
+  <div class="menu-item"><h3 style="font-size:1.1rem">Sides <span style="color:#c0b8a8;font-weight:400;font-size:.875rem">($5 each or $8 for two)</span></h3><p class="desc">Smoked Gouda Mac • Collard Greens • Cowboy Beans • Cornbread (w/ honey butter) • Pickle Spear</p></div>
+</section>
+
+<section id="schedule" class="section" style="background:#2D0F02;max-width:100%">
+  <div style="max-width:750px;margin:0 auto">
+    <div class="section-title">
+      <p class="label">Catch Us</p>
+      <h2>Weekly Schedule</h2>
+    </div>
+    <div class="schedule-item"><span class="day">MON</span><span class="detail"> — Off the road. Prepping brisket.</span></div>
+    <div class="schedule-item"><span class="day">TUE</span><span class="detail"> — 11-8 • Gettysburg College</span></div>
+    <div class="schedule-item"><span class="day">WED</span><span class="detail"> — 11-8 • Lincoln Square</span></div>
+    <div class="schedule-item"><span class="day">THU</span><span class="detail"> — 2-9 • Battlefield Brew Works</span></div>
+    <div class="schedule-item featured"><span class="day">FRI-SAT</span><span class="detail"> — 11-9 • Lincoln Square</span><br><span style="color:#E85D04;font-size:.75rem;font-weight:700;margin-top:.25rem;display:inline-block">🔥 BUSIEST DAYS — come early</span></div>
+    <div class="schedule-item"><span class="day">SUN</span><span class="detail"> — Catering &amp; Events Only</span></div>
+  </div>
+</section>
+
+<section class="section" style="max-width:900px;margin:0 auto">
+  <div class="section-title">
+    <p class="label">The People Speak</p>
+    <h2>Reviews</h2>
+  </div>
+  <div class="reviews">
+    <div class="review-card"><div class="stars">★★★★★</div><p>"Best brisket in Pennsylvania. Period. I've eaten BBQ in Austin and this holds up."</p><p class="author">— Tyler J., Chambersburg</p></div>
+    <div class="review-card"><div class="stars">★★★★★</div><p>"The dino rib is life-changing. Get there before noon on Saturdays or it's gone."</p><p class="author">— Mike D., Hanover</p></div>
+  </div>
+</section>
+
+<section class="cta">
+  <h2>Private Events</h2>
+  <p>Weddings, graduations, corporate lunches. Full-service catering for 20–200.</p>
+  <button onclick="document.getElementById('preview-modal').classList.add('show')" class="btn btn-primary" style="font-size:1.25rem;padding:1rem 2.5rem">Book Catering 🔒</button>
+</section>
+
+<div id="preview-modal" class="modal">
+  <div class="modal-box">
+    <div style="font-size:3rem;margin-bottom:1rem">🔒</div>
+    <h3>Online Ordering &amp; Catering</h3>
+    <p>Available with a full subscription. This is a preview.</p>
+    <button onclick="document.getElementById('preview-modal').classList.remove('show')">Got it</button>
+  </div>
+</div>
+
+<footer>
+  <p style="margin-bottom:.25rem">Preview built for <strong style="color:#c0b8a8">Smoke &amp; Steel BBQ</strong>. Not yet live.</p>
+  <p>Powered by <a href="https://sg1-labs.us">SG1 Labs</a></p>
+</footer>
+
+</body>
+</html>

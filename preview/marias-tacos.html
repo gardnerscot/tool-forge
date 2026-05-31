@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Maria's Tacos — Authentic Mexican Street Food Since 1994</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          warm: { 50: '#FFFBEB', 100: '#FEF3C7', 400: '#F59E0B', 500: '#D97706', 600: '#B45309', 700: '#92400E', 800: '#78350F', 900: '#451A03' },
+          cream: '#FFF8F0',
+          charcoal: '#1C1917',
+          rust: '#C2410C',
+        },
+        fontFamily: { display: ['Georgia', 'Times New Roman', 'serif'], }
+      }
+    }
+  }
+</script>
+<style>
+  .hero-bg { background: linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.55)), url('https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=1200&q=80') center/cover no-repeat; }
+  .menu-card:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+  .star { color: #F59E0B; }
+  .review-card { min-width: 280px; }
+  @media (max-width: 640px) { .review-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; scroll-snap-type: x mandatory; } .review-card { scroll-snap-align: start; } }
+</style>
+</head>
+<body class="bg-cream text-charcoal font-sans antialiased">
+
+<header class="hero-bg min-h-[70vh] flex items-center justify-center text-center px-4">
+  <div class="max-w-2xl">
+    <h1 class="text-5xl md:text-7xl font-display text-white mb-4 leading-tight">Maria's Tacos</h1>
+    <p class="text-xl md:text-2xl text-warm-100 mb-6">Authentic Mexican Street Food Since 1994</p>
+    <div class="flex items-center justify-center gap-2 mb-8">
+      <span class="text-3xl font-bold text-warm-400">4.7</span><span class="text-2xl star">★★★★★</span><span class="text-warm-100">(312 reviews)</span>
+    </div>
+    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+      <a href="#menu" class="bg-warm-500 hover:bg-warm-600 text-white px-8 py-3 rounded-full font-semibold text-lg transition">View Menu</a>
+      <a href="#order" class="bg-white/90 hover:bg-white text-warm-700 px-8 py-3 rounded-full font-semibold text-lg transition">Order Online</a>
+    </div>
+  </div>
+</header>
+
+<section class="py-16 md:py-24 px-4 max-w-4xl mx-auto">
+  <div class="flex flex-col md:flex-row gap-10 items-center">
+    <div class="md:w-1/2"><img src="https://images.unsplash.com/photo-1551504734-5ee1c4a1479b?w=600&q=80" alt="Maria's Tacos interior" class="rounded-2xl shadow-lg w-full h-80 object-cover"></div>
+    <div class="md:w-1/2">
+      <span class="text-warm-500 font-semibold tracking-wide uppercase text-sm">Our Story</span>
+      <h2 class="text-3xl md:text-4xl font-display text-warm-800 mt-2 mb-6">Three generations. One recipe.</h2>
+      <p class="text-gray-600 leading-relaxed mb-4">Maria opened this kitchen in 1994 with her grandmother's recipes and a single burner. Thirty years later, we're still making every tortilla by hand and slow-cooking our carnitas the way Abuela taught us — no shortcuts, no compromises.</p>
+      <p class="text-gray-600 leading-relaxed mb-4">We source our chiles from Oaxaca, our limes from local farms, and our energy from the families who've been eating here since day one.</p>
+      <p class="text-gray-500 italic">— Maria Hernandez, Owner</p>
+    </div>
+  </div>
+</section>
+
+<section id="menu" class="py-16 md:py-24 bg-white">
+  <div class="max-w-5xl mx-auto px-4">
+    <div class="text-center mb-12"><span class="text-warm-500 font-semibold tracking-wide uppercase text-sm">What We Serve</span><h2 class="text-3xl md:text-4xl font-display text-warm-800 mt-2">Our Menu</h2></div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div class="menu-card bg-cream rounded-xl p-6 transition duration-200"><h3 class="font-bold text-lg text-warm-800">Carnitas Tacos</h3><p class="text-gray-500 text-sm mt-1">Slow-cooked pork, pickled onion, cilantro, salsa verde</p><p class="text-warm-600 font-bold mt-3">$4.50 each / 3 for $12</p></div>
+      <div class="menu-card bg-cream rounded-xl p-6 transition duration-200"><h3 class="font-bold text-lg text-warm-800">Al Pastor Tacos</h3><p class="text-gray-500 text-sm mt-1">Marinated pork, grilled pineapple, fresh onion, cilantro</p><p class="text-warm-600 font-bold mt-3">$4.50 each / 3 for $12</p></div>
+      <div class="menu-card bg-cream rounded-xl p-6 transition duration-200"><h3 class="font-bold text-lg text-warm-800">Baja Fish Tacos</h3><p class="text-gray-500 text-sm mt-1">Beer-battered cod, cabbage slaw, chipotle crema</p><p class="text-warm-600 font-bold mt-3">$5.50 each / 3 for $15</p></div>
+      <div class="menu-card bg-cream rounded-xl p-6 transition duration-200"><h3 class="font-bold text-lg text-warm-800">Street Corn (Elote)</h3><p class="text-gray-500 text-sm mt-1">Grilled corn, cotija cheese, chili-lime mayo</p><p class="text-warm-600 font-bold mt-3">$6.00</p></div>
+      <div class="menu-card bg-cream rounded-xl p-6 transition duration-200"><h3 class="font-bold text-lg text-warm-800">Guacamole & Chips</h3><p class="text-gray-500 text-sm mt-1">Made to order. Hass avocados, lime, serrano, cilantro</p><p class="text-warm-600 font-bold mt-3">$9.00</p></div>
+      <div class="menu-card bg-cream rounded-xl p-6 transition duration-200"><h3 class="font-bold text-lg text-warm-800">Horchata</h3><p class="text-gray-500 text-sm mt-1">House-made rice milk, cinnamon, vanilla</p><p class="text-warm-600 font-bold mt-3">$3.50</p></div>
+    </div>
+    <div class="text-center mt-10 text-gray-400 text-sm italic">Daily specials posted on our board — ask about today's special!</div>
+  </div>
+</section>
+
+<section class="py-16 md:py-24 px-4 max-w-5xl mx-auto">
+  <div class="grid md:grid-cols-2 gap-10">
+    <div>
+      <span class="text-warm-500 font-semibold tracking-wide uppercase text-sm">Visit Us</span>
+      <h2 class="text-3xl md:text-4xl font-display text-warm-800 mt-2 mb-6">Hours & Location</h2>
+      <div class="space-y-2 text-gray-600 text-lg">
+        <p class="flex justify-between"><span>Monday – Thursday</span> <span>11 AM – 9 PM</span></p>
+        <p class="flex justify-between"><span>Friday – Saturday</span> <span>11 AM – 11 PM</span></p>
+        <p class="flex justify-between"><span>Sunday</span> <span>12 PM – 8 PM</span></p>
+      </div>
+      <div class="mt-6 text-gray-600"><p class="font-semibold text-lg">📍 847 South Street, Philadelphia, PA 19147</p><p class="mt-1">📞 (215) 555-0147</p></div>
+    </div>
+    <div class="rounded-2xl overflow-hidden h-64 md:h-auto shadow-lg"><iframe src="https://www.google.com/maps?q=847+South+Street+Philadelphia+PA+19147&output=embed" width="100%" height="100%" style="border:0; min-height:300px;" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div>
+  </div>
+</section>
+
+<section class="py-16 md:py-24 bg-warm-50">
+  <div class="max-w-5xl mx-auto px-4">
+    <div class="text-center mb-10"><span class="text-warm-500 font-semibold tracking-wide uppercase text-sm">What People Say</span><h2 class="text-3xl md:text-4xl font-display text-warm-800 mt-2">Reviews</h2></div>
+    <div class="review-scroll flex gap-6 pb-4 md:grid md:grid-cols-3">
+      <div class="review-card bg-white rounded-xl p-6 shadow-sm flex-shrink-0 md:flex-shrink"><div class="star text-lg mb-2">★★★★★</div><p class="text-gray-600 mb-3">"Best carnitas I've ever had. The tortillas are clearly handmade. Maria came to our table herself."</p><p class="font-semibold text-warm-800">— James K.</p><p class="text-gray-400 text-sm">2 weeks ago</p></div>
+      <div class="review-card bg-white rounded-xl p-6 shadow-sm flex-shrink-0 md:flex-shrink"><div class="star text-lg mb-2">★★★★★</div><p class="text-gray-600 mb-3">"My family has been coming here since the 90s. The al pastor tacos are legendary."</p><p class="font-semibold text-warm-800">— Sarah M.</p><p class="text-gray-400 text-sm">1 month ago</p></div>
+      <div class="review-card bg-white rounded-xl p-6 shadow-sm flex-shrink-0 md:flex-shrink"><div class="star text-lg mb-2">★★★★☆</div><p class="text-gray-600 mb-3">"Great food, incredible vibe. Only knock is the wait on weekends — but worth it."</p><p class="font-semibold text-warm-800">— David R.</p><p class="text-gray-400 text-sm">3 weeks ago</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="order" class="py-20 md:py-28 bg-warm-800 text-white text-center px-4">
+  <h2 class="text-3xl md:text-5xl font-display mb-4">Ready to Order?</h2>
+  <p class="text-warm-100 text-lg mb-8 max-w-lg mx-auto">Skip the line. Order online for pickup — your food will be ready when you arrive.</p>
+  <button onclick="document.getElementById('preview-modal').classList.remove('hidden')" class="bg-warm-400 hover:bg-warm-500 text-warm-900 px-10 py-4 rounded-full font-bold text-xl transition shadow-lg">Order Online 🔒</button>
+</section>
+
+<div id="preview-modal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl max-w-md w-full p-8 text-center shadow-2xl">
+    <div class="text-5xl mb-4">🔒</div><h3 class="text-2xl font-display text-warm-800 mb-2">Online Ordering</h3>
+    <p class="text-gray-500 mb-6">Available with a full subscription. This is a preview of what your site could look like.</p>
+    <button onclick="document.getElementById('preview-modal').classList.add('hidden')" class="bg-warm-500 hover:bg-warm-600 text-white px-6 py-2 rounded-full font-semibold transition">Got it</button>
+  </div>
+</div>
+
+<footer class="py-8 px-4 text-center text-gray-400 text-sm border-t border-gray-200">
+  <p class="mb-1">Preview built for <strong class="text-gray-500">Maria's Tacos</strong>. Not yet live.</p>
+  <p>Powered by <a href="https://sg1-labs.us" class="text-warm-500 hover:underline">SG1 Labs</a> — Websites for local businesses.</p>
+</footer>
+
+</body>
+</html>

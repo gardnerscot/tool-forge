@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Golden Hearth Bakery — Artisan Bread, Hand-Crafted Daily</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={theme:{extend:{colors:{hearth:{50:'#FFF8F0',100:'#FFEDD5',400:'#F59E4B',500:'#D97A2B',600:'#B85C1A',700:'#8B3E0A',800:'#5C2604',900:'#3D1802'},cream:'#FFFBF5',crust:'#8B5E3C',wheat:'#D4A24E'},fontFamily:{display:['Georgia','Times New Roman','serif']}}}};</script>
+<style>.hero-bg{background:linear-gradient(rgba(0,0,0,0.25),rgba(0,0,0,0.35)),url('https://images.unsplash.com/photo-1509440159596-0249088772ff?w=1200&q=80') center/cover no-repeat;}.bread-card:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,0,0,0.06)}</style>
+</head>
+<body class="bg-cream text-crust font-sans antialiased">
+
+<header class="hero-bg min-h-[60vh] flex items-center justify-center text-center px-4">
+  <div class="max-w-2xl">
+    <p class="text-hearth-200 uppercase tracking-widest text-sm mb-3">Baked Fresh Every Morning</p>
+    <h1 class="text-4xl md:text-7xl font-display text-white mb-4 leading-tight">Golden Hearth Bakery</h1>
+    <p class="text-xl md:text-2xl text-hearth-100 mb-6">Artisan Bread & Pastries — Gettysburg, PA</p>
+    <div class="inline-block bg-white/15 backdrop-blur-sm rounded-full px-6 py-3 text-white text-sm">🥖 Open Daily 6 AM – 2 PM | 42 Baltimore Street</div>
+  </div>
+</header>
+
+<section class="py-16 md:py-24 px-4 max-w-4xl mx-auto">
+  <div class="flex flex-col md:flex-row gap-10 items-center">
+    <div class="md:w-1/2"><img src="https://images.unsplash.com/photo-1555507036-ab1f4038024a?w=600&q=80" alt="Bakery interior" class="rounded-2xl shadow-lg w-full h-80 object-cover"></div>
+    <div class="md:w-1/2">
+      <span class="text-wheat font-semibold tracking-wide uppercase text-sm">Our Story</span>
+      <h2 class="text-3xl md:text-4xl font-display text-hearth-700 mt-2 mb-6">3 AM. Flour. Water. Salt. Magic.</h2>
+      <p class="text-gray-600 leading-relaxed mb-4">Since 2012, our bakers have been arriving before dawn to hand-shape every loaf, croissant, and pastry. We use organic flour, local butter, and a 14-year-old sourdough starter named Beatrice.</p>
+      <p class="text-gray-600 leading-relaxed mb-4">Nothing frozen. Nothing commercial. Just flour, water, salt, and patience — the way bread was meant to be made.</p>
+      <p class="text-gray-500 italic">— Rachel & the Golden Hearth team</p>
+    </div>
+  </div>
+</section>
+
+<section class="py-16 md:py-24 bg-hearth-50">
+  <div class="max-w-5xl mx-auto px-4">
+    <div class="text-center mb-12">
+      <span class="text-wheat font-semibold tracking-wide uppercase text-sm">Today's Bake</span>
+      <h2 class="text-3xl md:text-4xl font-display text-hearth-700 mt-2">Bread & Pastry</h2>
+      <p class="text-gray-500 mt-2">Menu changes daily. Come early — we sell out.</p>
+    </div>
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div class="bread-card bg-white rounded-xl p-6 shadow-sm"><div class="text-4xl mb-3">🍞</div><h3 class="font-bold text-lg text-hearth-700">Country Sourdough</h3><p class="text-gray-500 text-sm mt-1">14-year starter. 24-hour cold ferment. Tangy, open crumb.</p><p class="text-wheat font-bold mt-3">$8</p></div>
+      <div class="bread-card bg-white rounded-xl p-6 shadow-sm border-2 border-wheat/20"><div class="text-4xl mb-3">🥐</div><h3 class="font-bold text-lg text-hearth-700">Butter Croissant ⭐</h3><p class="text-gray-500 text-sm mt-1">3-day lamination. 82% butterfat French butter.</p><p class="text-wheat font-bold mt-3">$4.50</p><span class="inline-block bg-wheat/10 text-wheat text-xs px-2 py-1 rounded-full mt-2">Best Seller</span></div>
+      <div class="bread-card bg-white rounded-xl p-6 shadow-sm"><div class="text-4xl mb-3">🌾</div><h3 class="font-bold text-lg text-hearth-700">Seeded Whole Wheat</h3><p class="text-gray-500 text-sm mt-1">Sesame, sunflower, flax, pumpkin. Dense & nutty.</p><p class="text-wheat font-bold mt-3">$9</p></div>
+      <div class="bread-card bg-white rounded-xl p-6 shadow-sm"><div class="text-4xl mb-3">🫒</div><h3 class="font-bold text-lg text-hearth-700">Rosemary Olive Oil</h3><p class="text-gray-500 text-sm mt-1">Kalamata olives, fresh rosemary, local olive oil.</p><p class="text-wheat font-bold mt-3">$10</p></div>
+      <div class="bread-card bg-white rounded-xl p-6 shadow-sm"><div class="text-4xl mb-3">🥖</div><h3 class="font-bold text-lg text-hearth-700">Baguette</h3><p class="text-gray-500 text-sm mt-1">French-style. Crackling crust, airy center.</p><p class="text-wheat font-bold mt-3">$5</p></div>
+      <div class="bread-card bg-white rounded-xl p-6 shadow-sm"><div class="text-4xl mb-3">🍪</div><h3 class="font-bold text-lg text-hearth-700">Morning Pastry Box</h3><p class="text-gray-500 text-sm mt-1">2 croissants, 4 scones, 6 cookies + 1 loaf.</p><p class="text-wheat font-bold mt-3">$32</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="py-16 md:py-24 px-4 max-w-4xl mx-auto">
+  <div class="text-center mb-10"><span class="text-wheat font-semibold tracking-wide uppercase text-sm">Find Us</span><h2 class="text-3xl md:text-4xl font-display text-hearth-700 mt-2">Hours & Location</h2></div>
+  <div class="grid md:grid-cols-2 gap-10">
+    <div class="space-y-2 text-gray-600 text-lg">
+      <p class="flex justify-between"><span>Mon – Fri</span> <span>6 AM – 2 PM</span></p>
+      <p class="flex justify-between"><span>Saturday</span> <span>7 AM – 2 PM</span></p>
+      <p class="flex justify-between"><span>Sunday</span> <span>7 AM – 12 PM</span></p>
+      <div class="mt-6"><p class="font-semibold text-lg">📍 42 Baltimore Street, Gettysburg, PA 17325</p><p class="mt-1">📞 (717) 555-OVEN</p></div>
+    </div>
+    <div class="rounded-2xl overflow-hidden shadow-lg" style="min-height:300px;"><iframe src="https://www.openstreetmap.org/export/embed.html?bbox=-77.2400,39.8250,-77.2200,39.8350&layer=mapnik&marker=39.8305,-77.2300" width="100%" height="300" style="border:0;" allowfullscreen loading="lazy"></iframe></div>
+  </div>
+</section>
+
+<section class="py-16 md:py-24 bg-hearth-50"><div class="max-w-4xl mx-auto px-4"><div class="text-center mb-10"><span class="text-wheat font-semibold tracking-wide uppercase text-sm">What People Say</span><h2 class="text-3xl md:text-4xl font-display text-hearth-700 mt-2">Reviews</h2></div><div class="grid md:grid-cols-2 gap-6"><div class="bg-white rounded-xl p-6 shadow-sm"><div class="text-wheat text-lg mb-2">★★★★★</div><p class="text-gray-600 mb-3">"The sourdough is the best I've had outside of San Francisco. The croissants are flaky, buttery perfection. I'm here twice a week."</p><p class="font-semibold text-hearth-700">— Amanda S., Gettysburg</p></div><div class="bg-white rounded-xl p-6 shadow-sm"><div class="text-wheat text-lg mb-2">★★★★★</div><p class="text-gray-600 mb-3">"Found this place during a battlefield tour. The rosemary olive oil bread with a coffee was the best lunch I didn't plan to have. Took a loaf home."</p><p class="font-semibold text-hearth-700">— Kevin L., visitor from DC</p></div></div></div></section>
+
+<section class="py-16 md:py-24 bg-hearth-700 text-white text-center px-4">
+  <h2 class="text-3xl md:text-5xl font-display mb-4">Fresh Out of the Oven</h2>
+  <p class="text-hearth-100 text-lg mb-8 max-w-lg mx-auto">Order ahead for pickup. Bread, pastries, and pastry boxes ready when you arrive.</p>
+  <button onclick="document.getElementById('preview-modal').classList.remove('hidden')" class="bg-wheat hover:bg-hearth-400 text-hearth-900 px-10 py-4 rounded-full font-bold text-xl transition shadow-lg">Order Online 🔒</button>
+</section>
+
+<div id="preview-modal" class="hidden fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4"><div class="bg-white rounded-2xl max-w-md w-full p-8 text-center shadow-2xl"><div class="text-5xl mb-4">🔒</div><h3 class="text-2xl font-display text-hearth-700 mb-2">Online Ordering</h3><p class="text-gray-500 mb-6">Online ordering & pickup available with a full subscription. This is a preview.</p><button onclick="document.getElementById('preview-modal').classList.add('hidden')" class="bg-wheat hover:bg-hearth-400 text-hearth-900 px-6 py-2 rounded-full font-semibold transition">Got it</button></div></div>
+
+<footer class="py-8 px-4 text-center text-gray-400 text-sm border-t border-gray-200"><p class="mb-1">Preview built for <strong class="text-gray-500">Golden Hearth Bakery</strong>. Not yet live.</p><p>Powered by <a href="https://sg1-labs.us" class="text-wheat hover:underline">SG1 Labs</a></p></footer>
+</body>
+</html>
