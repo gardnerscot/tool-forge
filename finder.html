@@ -347,7 +347,7 @@
         <option value="distillery">Distilleries &amp; Breweries</option>
         <option value="food_truck">Food Trucks</option>
         <option value="butcher">Butchers &amp; Meat</option>
-        <option value="marketplace">Markets</option>
+        <option value="market">Markets</option>
       </select>
     </div>
     <div class="field">
@@ -401,16 +401,15 @@
   const tbody        = document.getElementById('tbody');
 
   // ── OSM tag mappings ────────────────────────────────────────
-  const TAG_MAP = {
-    restaurant:  { tag: ['amenity','restaurant'] },
-    cafe:        { tag: ['amenity','cafe'] },
-    bakery:      { tag: ['shop','bakery'] },
-    farm:        { tag: ['shop','farm'] },
-    distillery:  { tag: ['craft','distillery'] },
-    brewery:     { tag: ['craft','brewery'] },
-    food_truck:  { tag: ['amenity','fast_food'] },
-    butcher:     { tag: ['shop','butcher'] },
-    marketplace: { tag: ['amenity','marketplace'] }
+  var CATEGORIES = {
+    restaurant:  'restaurant',
+    cafe:        'cafe',
+    bakery:      'bakery',
+    farm:        'farm+stand',
+    distillery:  'distillery',
+    food_truck:  'food+truck',
+    butcher:     'butcher',
+    market:      'farmers+market'
   };
 
   // ── UI helpers ──────────────────────────────────────────────
@@ -463,146 +462,100 @@
     return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
-  // ── Build full address from OSM tags ────────────────────────
-  function buildAddress(tags) {
-    const parts = [];
-    const street = tags['addr:street'];
-    const number = tags['addr:housenumber'];
-    if (number && street) parts.push(number + ' ' + street);
-    else if (street) parts.push(street);
-    else if (number) parts.push(number);
-    if (tags['addr:city']) parts.push(tags['addr:city']);
-    else if (tags['addr:town']) parts.push(tags['addr:town']);
-    if (tags['addr:state']) parts.push(tags['addr:state']);
-    if (tags['addr:postcode']) parts.push(tags['addr:postcode']);
-    return parts.join(', ') || null;
+  // ── Build display address from Nominatim result ────────────
+  function buildAddress(item) {
+    var addr = item.address || {};
+    var parts = [];
+    if (addr.road && addr.house_number) parts.push(addr.house_number + ' ' + addr.road);
+    else if (addr.road) parts.push(addr.road);
+    if (addr.town || addr.city || addr.village) parts.push(addr.town || addr.city || addr.village);
+    if (addr.state) parts.push(addr.state);
+    return parts.join(', ') || item.display_name || '';
   }
 
   // ── Build preview URL ───────────────────────────────────────
-  function previewUrl(type, el) {
-    const tags = el.tags || {};
-    const name = tags.name || 'Unnamed';
-    const addr = buildAddress(tags) || '';
-    const phone = tags.phone || tags['contact:phone'] || '';
-    const website = tags.website || tags['contact:website'] || '';
-    const params = new URLSearchParams();
+  function previewUrl(type, item) {
+    var name = item.name || 'Unnamed';
+    var addr = buildAddress(item) || '';
+    var params = new URLSearchParams();
     params.set('type', type);
     params.set('name', name);
     if (addr) params.set('address', addr);
-    if (phone) params.set('phone', phone);
-    if (website) params.set('website', website);
     return './generator.html?' + params.toString();
   }
 
   // ── Render results ──────────────────────────────────────────
-  function renderResults(elements, type) {
+  function renderResults(items, type) {
     statusDiv.innerHTML = '';
 
-    if (!elements || elements.length === 0) {
+    if (!items || items.length === 0) {
       summaryDiv.textContent = 'No results found.';
       summaryDiv.style.display = 'block';
-      showEmpty('No businesses found for this category and location. Try a larger radius or different town.');
+      showEmpty('No businesses found. Try a different town or category.');
       return;
     }
 
-    summaryDiv.textContent = 'Found ' + elements.length + ' result' + (elements.length !== 1 ? 's' : '');
+    summaryDiv.textContent = 'Found ' + items.length + ' result' + (items.length !== 1 ? 's' : '');
     summaryDiv.style.display = 'block';
 
     // Sort by name
-    elements.sort(function(a, b) {
-      var na = (a.tags && a.tags.name || '').toLowerCase();
-      var nb = (b.tags && b.tags.name || '').toLowerCase();
+    items.sort(function(a, b) {
+      var na = (a.name || '').toLowerCase();
+      var nb = (b.name || '').toLowerCase();
       return na < nb ? -1 : na > nb ? 1 : 0;
     });
 
     // Build table rows
     tbody.innerHTML = '';
-    for (var i = 0; i < elements.length; i++) {
-      var el = elements[i];
-      var tags = el.tags || {};
-      var name = escapeHtml(tags.name || 'Unnamed');
-      var addr = escapeHtml(buildAddress(tags) || '—');
-      var website = tags.website || tags['contact:website'] || '';
-      var phone = tags.phone || tags['contact:phone'] || '';
-      var pUrl = previewUrl(type, el);
+    for (var i = 0; i < items.length; i++) {
+      var item = items[i];
+      var name = escapeHtml(item.name || 'Unnamed');
+      var addr = escapeHtml(buildAddress(item) || '—');
+      var pUrl = previewUrl(type, item);
 
       var tr = document.createElement('tr');
       tr.innerHTML =
         '<td class="name-cell">' + name + '</td>' +
         '<td class="address-cell">' + addr + '</td>' +
-        '<td class="link-cell">' +
-          (website ? '<a href="' + escapeHtml(website) + '" target="_blank" rel="noopener">' + escapeHtml(website.replace(/^https?:\/\//,'')) + '</a><br>' : '') +
-          (phone ? escapeHtml(phone) : '') +
-        '</td>' +
+        '<td>' + (item.class || item.type || '') + '</td>' +
         '<td><a class="btn-preview" href="' + pUrl + '">Generate Preview &rarr;</a></td>';
       tbody.appendChild(tr);
     }
 
     // Build cards
     cardsDiv.innerHTML = '';
-    for (var j = 0; j < elements.length; j++) {
-      var cel = elements[j];
-      var ctags = cel.tags || {};
-      var cname = escapeHtml(ctags.name || 'Unnamed');
-      var caddr = escapeHtml(buildAddress(ctags) || '—');
-      var cwebsite = ctags.website || ctags['contact:website'] || '';
-      var cphone = ctags.phone || ctags['contact:phone'] || '';
-      var cpUrl = previewUrl(type, cel);
+    for (var j = 0; j < items.length; j++) {
+      var citem = items[j];
+      var cname = escapeHtml(citem.name || 'Unnamed');
+      var caddr = escapeHtml(buildAddress(citem) || '—');
+      var cpUrl = previewUrl(type, citem);
 
       var card = document.createElement('div');
       card.className = 'result-card';
-      var linksHtml = '';
-      if (cwebsite) linksHtml += '<a href="' + escapeHtml(cwebsite) + '" target="_blank" rel="noopener">' + escapeHtml(cwebsite.replace(/^https?:\/\//,'')) + '</a>';
-      if (cphone) linksHtml += (linksHtml ? ' &middot; ' : '') + escapeHtml(cphone);
       card.innerHTML =
         '<div class="rc-name">' + cname + '</div>' +
         '<div class="rc-address">' + caddr + '</div>' +
-        '<div class="rc-links">' + (linksHtml || '&nbsp;') + '</div>' +
         '<div class="rc-actions"><a class="btn-preview" href="' + cpUrl + '">Generate Preview &rarr;</a></div>';
       cardsDiv.appendChild(card);
     }
   }
 
-  // ── Geocode via Nominatim ────────────────────────────────────
-  async function geocode(query) {
-    var url = 'https://nominatim.openstreetmap.org/search?format=json&limit=1&q=' + encodeURIComponent(query);
+  // ── Query Nominatim API ─────────────────────────────────────
+  async function queryNominatim(category, town) {
+    var q = encodeURIComponent(category + ' in ' + town);
+    var url = 'https://nominatim.openstreetmap.org/search?q=' + q + '&format=json&limit=20&addressdetails=1';
     var resp = await fetch(url, {
       headers: { 'Accept': 'application/json' }
     });
-    if (!resp.ok) throw new Error('Geocoding failed (HTTP ' + resp.status + ')');
+    if (!resp.ok) throw new Error('Nominatim API error (HTTP ' + resp.status + ')');
     var data = await resp.json();
-    if (!data || data.length === 0) throw new Error('Town not found. Try a more specific name (e.g. "Gettysburg PA").');
-    return {
-      lat: parseFloat(data[0].lat),
-      lon: parseFloat(data[0].lon),
-      display_name: data[0].display_name
-    };
+    return data || [];
   }
 
-  // ── Query Overpass API ──────────────────────────────────────
-  async function queryOverpass(tagKey, tagVal, lat, lon, radiusMeters) {
-    var query = '[out:json];node["' + tagKey + '"="' + tagVal + '"](around:' + radiusMeters + ',' + lat + ',' + lon + ');out;';
-    var resp = await fetch('https://overpass-api.de/api/interpreter', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: 'data=' + encodeURIComponent(query)
-    });
-    if (!resp.ok) throw new Error('Overpass API error (HTTP ' + resp.status + ')');
-    var data = await resp.json();
-    return data.elements || [];
-  }
-
-  // ── Debounce / delay utility ────────────────────────────────
-  function delay(ms) {
-    return new Promise(function(resolve) { setTimeout(resolve, ms); });
-  }
-
-  // ── Main search handler ─────────────────────────────────────
+  // ── Main search handler (Nominatim — no geocode needed) ────
   searchBtn.addEventListener('click', async function() {
     var town = townInput.value.trim();
     var category = catSelect.value;
-    var radiusKm = parseInt(radiusSlider.value, 10);
-    var radiusMeters = radiusKm * 1000;
 
     if (!town) {
       showError('Please enter a town or city name.');
@@ -617,41 +570,16 @@
     showLoading();
 
     try {
-      // Geocode
-      var geo = await geocode(town);
+      var searchTerm = CATEGORIES[category] || category;
+      var results = await queryNominatim(searchTerm, town);
 
-      // Short delay to respect Nominatim rate limits
-      await delay(600);
-
-      // Query Overpass
-      var tagInfo = TAG_MAP[category];
-      var results = await queryOverpass(tagInfo.tag[0], tagInfo.tag[1], geo.lat, geo.lon, radiusMeters);
-
-      // For distillery category, also try brewery
-      if (category === 'distillery') {
-        await delay(600);
-        try {
-          var brewResults = await queryOverpass('craft', 'brewery', geo.lat, geo.lon, radiusMeters);
-          results = results.concat(brewResults);
-        } catch (e) {
-          console.warn('Brewery sub-query failed (non-fatal):', e);
-        }
-      }
-
-      // Deduplicate by id
+      // Deduplicate by place_id
       var seen = {};
       results = results.filter(function(el) {
-        if (seen[el.id]) return false;
-        seen[el.id] = true;
+        if (seen[el.place_id]) return false;
+        seen[el.place_id] = true;
         return true;
       });
-
-      // For food_truck category, filter to those that might be food trucks
-      // (fast_food covers a lot; we keep all but note in name)
-      if (category === 'food_truck') {
-        // Just use results as-is; OSM fast_food is the best proxy
-      }
-
       renderResults(results, category);
 
     } catch (err) {
