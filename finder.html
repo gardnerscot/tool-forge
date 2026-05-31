@@ -446,18 +446,8 @@
     market:      ['market']
   };
 
-  var API_KEY = null;
-
-  // Fetch key from Cloudflare Pages Function (never in git)
-  async function loadApiKey() {
-    try {
-      var resp = await fetch('/api/config');
-      var data = await resp.json();
-      API_KEY = data.apiKey;
-    } catch(e) {
-      console.error('Failed to load API key:', e);
-    }
-  }
+  // Key restricted to toolforge.sg1-labs.us — unusable elsewhere
+  var API_KEY = 'AIzaSyAA0JIHn5pDV0W9vuR4-wKGEbWGPp-A7s0';
 
   // ── UI helpers ──────────────────────────────────────────────
   radiusSlider.addEventListener('input', function() {
@@ -651,14 +641,6 @@
 
     searchBtn.disabled = true;
     showLoading();
-
-    // Ensure API key is loaded
-    if (!API_KEY) await loadApiKey();
-    if (!API_KEY) {
-      showError('API key not available. Please try again.');
-      searchBtn.disabled = false;
-      return;
-    }
 
     try {
       var results;
