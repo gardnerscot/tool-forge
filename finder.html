@@ -646,7 +646,8 @@
 
       if (category === 'distillery') {
         // Text search for distilleries + breweries
-        results = await searchText('distillery OR brewery in ' + location);
+        // Keywords cover brewpubs, taprooms, and craft spirits
+        results = await searchText('brewery distillery craft beer ' + location);
       } else {
         var types = PLACE_TYPES[category];
         var geo = await geocode(location);
