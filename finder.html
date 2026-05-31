@@ -591,6 +591,16 @@
       var searchTerm = CATEGORIES[category] || category;
       var results = await queryNominatim(searchTerm, location);
 
+      // Distillery category: also search for breweries (Nominatim misses craft=distillery)
+      if (category === 'distillery') {
+        try {
+          var brewResults = await queryNominatim('brewery', location);
+          results = results.concat(brewResults);
+        } catch (e) {
+          console.warn('Brewery sub-query failed:', e);
+        }
+      }
+
       // Deduplicate by place_id
       var seen = {};
       results = results.filter(function(el) {
