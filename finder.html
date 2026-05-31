@@ -441,7 +441,7 @@
     bakery:      ['bakery'],
     farm:        ['farm'],
     distillery:  null, // uses text search
-    food_truck:  ['meal_takeaway'],
+    food_truck:  null, // uses text search
     butcher:     ['butcher_shop'],
     market:      ['market']
   };
@@ -662,6 +662,9 @@
         // Text search for distilleries + breweries
         // Keywords cover brewpubs, taprooms, and craft spirits
         results = await searchText('brewery distillery craft beer ' + location);
+      } else if (category === 'food_truck') {
+        // No "food_truck" place type in Places API — use text search
+        results = await searchText('food truck ' + location);
       } else {
         var types = PLACE_TYPES[category];
         var geo = await geocode(location);
