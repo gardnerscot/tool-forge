@@ -500,11 +500,17 @@
   }
 
   // ── Build preview URL from Places result ────────────────────
+  var TYPE_MAP = {
+    restaurant: 'restaurant', cafe: 'coffee', bakery: 'bakery',
+    farm: 'farmvendor', market: 'farmstore', distillery: 'distillery',
+    food_truck: 'foodtruck', butcher: 'farmstore'
+  };
   function previewUrl(type, place) {
+    var genType = TYPE_MAP[type] || type;
     var name = (place.displayName && place.displayName.text) || place.name || 'Unnamed';
     var addr = place.formattedAddress || '';
     var params = new URLSearchParams();
-    params.set('type', type);
+    params.set('type', genType);
     params.set('name', name);
     if (addr) params.set('address', addr);
     return './generator.html?' + params.toString();
