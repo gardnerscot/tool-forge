@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SG1 Labs Preview Generator</title>
+<style>
+/* ===== Generator UI (Dark Theme) ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #1a1a2e; color: #e0e0e0; overflow: hidden; height: 100vh;
+}
+#app { display: flex; height: 100vh; }
+#left { width: 420px; min-width: 360px; overflow-y: auto; padding: 1.5rem; background: #16213e; border-right: 1px solid #0f3460; }
+#right { flex: 1; display: flex; flex-direction: column; background: #0f0f1a; }
+#right-header { padding: 0.75rem 1.5rem; background: #16213e; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #0f3460; }
+#right-header h2 { font-size: 0.95rem; font-weight: 600; color: #e0e0e0; }
+#right-header .actions { display: flex; gap: 0.5rem; }
+#preview-frame { flex: 1; width: 100%; border: none; }
+h1 { font-size: 1.3rem; font-weight: 700; color: #e94560; margin-bottom: 0.25rem; }
+.subtitle { font-size: 0.8rem; color: #888; margin-bottom: 1.25rem; }
+.form-group { margin-bottom: 1rem; }
+.form-group label { display: block; font-size: 0.78rem; font-weight: 600; color: #aaa; margin-bottom: 0.3rem; text-transform: uppercase; letter-spacing: 0.04em; }
+.form-group input, .form-group textarea, .form-group select { width: 100%; padding: 0.55rem 0.65rem; background: #1a1a2e; border: 1px solid #0f3460; border-radius: 6px; color: #e0e0e0; font-size: 0.85rem; font-family: inherit; transition: border-color 0.2s; }
+.form-group input:focus, .form-group textarea:focus, .form-group select:focus { outline: none; border-color: #e94560; }
+.form-group textarea { resize: vertical; min-height: 60px; }
+.form-row { display: flex; gap: 0.75rem; }
+.form-row .form-group { flex: 1; }
+.section-label { font-size: 0.75rem; font-weight: 700; color: #e94560; text-transform: uppercase; letter-spacing: 0.08em; margin: 1.25rem 0 0.75rem; padding-top: 0.75rem; border-top: 1px solid #0f3460; }
+.dynamic-item { background: #1a1a2e; border: 1px solid #0f3460; border-radius: 8px; padding: 0.75rem; margin-bottom: 0.5rem; }
+.dynamic-item .form-row { margin-bottom: 0.4rem; }
+.dynamic-item .form-row:last-child { margin-bottom: 0; }
+.btn-remove { background: #e94560; color: #fff; border: none; padding: 0.2rem 0.5rem; border-radius: 4px; cursor: pointer; font-size: 0.7rem; }
+.btn-add { background: transparent; color: #e94560; border: 1px dashed #e94560; padding: 0.4rem 0.75rem; border-radius: 4px; cursor: pointer; font-size: 0.78rem; width: 100%; margin-top: 0.25rem; }
+.btn { padding: 0.5rem 1rem; border-radius: 6px; font-size: 0.8rem; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s; }
+.btn-primary { background: #e94560; color: #fff; }
+.btn-primary:hover { background: #d63850; }
+.btn-outline { background: transparent; border: 1px solid #0f3460; color: #ccc; }
+.btn-outline:hover { background: #1a1a2e; border-color: #e94560; }
+#copy-toast { position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%); background: #e94560; color: #fff; padding: 0.75rem 1.5rem; border-radius: 8px; font-weight: 600; font-size: 0.85rem; z-index: 999; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+#copy-toast.show { opacity: 1; }
+@media (max-width: 800px) {
+  #app { flex-direction: column; }
+  #left { width: 100%; min-width: unset; max-height: 50vh; }
+  #preview-frame { min-height: 400px; }
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="left">
+    <h1>SG1 Labs Preview</h1>
+    <p class="subtitle">Build &amp; preview demo pages in realtime</p>
+
+    <div class="form-group">
+      <label>Template Type</label>
+      <select id="type-select">
+        <option value="restaurant">Restaurant</option>
+        <option value="farmvendor">Farm Vendor</option>
+        <option value="farmstore">Farm Store</option>
+        <option value="subscription">Subscription Boxes</option>
+        <option value="foodtruck">Food Truck</option>
+        <option value="distillery">Distillery</option>
+        <option value="bakery">Bakery</option>
+        <option value="coffee">Coffee Shop</option>
+      </select>
+    </div>
+
+    <div class="section-label">Business Info</div>
+    <div class="form-group"><label>Business Name</label><input id="f-name" placeholder="e.g. Oak &amp; Ember" oninput="scheduleUpdate()"></div>
+    <div class="form-group"><label>Tagline</label><input id="f-tagline" placeholder="e.g. Farm-to-table, done right" oninput="scheduleUpdate()"></div>
+    <div class="form-group"><label>Description / Owner Story</label><textarea id="f-desc" placeholder="Tell your story..." oninput="scheduleUpdate()"></textarea></div>
+    <div class="form-row">
+      <div class="form-group"><label>Address</label><input id="f-address" placeholder="123 Main St, City" oninput="scheduleUpdate()"></div>
+      <div class="form-group"><label>Phone</label><input id="f-phone" placeholder="(555) 123-4567" oninput="scheduleUpdate()"></div>
+    </div>
+
+    <!-- Type-specific fields injected here -->
+    <div id="dynamic-fields"></div>
+  </div>
+
+  <div id="right">
+    <div id="right-header">
+      <h2>Live Preview</h2>
+      <div class="actions">
+        <button class="btn btn-outline" onclick="copyHTML()">Copy HTML</button>
+      </div>
+    </div>
+    <iframe id="preview-frame" sandbox="allow-scripts" title="Live Preview"></iframe>
+  </div>
+</div>
+<div id="copy-toast">HTML copied to clipboard!</div>
+
+<script>
+// ===== DATA MODEL =====
+const data = {
+  type: 'restaurant',
+  name: 'Oak & Ember',
+  tagline: 'Farm-to-table, done right.',
+  desc: 'Founded in 2018 by Chef Maria Torres, Oak & Ember started as a tiny pop-up in a renovated auto shop. Every dish is built around ingredients sourced within 50 miles.',
+  address: '221B Rustic Lane, Portland, OR 97201',
+  phone: '(503) 555-0142',
+  // type-specific defaults
+  rating: '4.7', reviews: '312',
+  menuItems: [
+    { name: 'Heritage Pork Chop', price: '32', desc: 'Cider-brined, roasted apple butter' },
+    { name: 'Wild Mushroom Risotto', price: '24', desc: 'Foraged chanterelles, parmesan brodo' },
+    { name: 'Roasted Beet Salad', price: '16', desc: 'Goat cheese, candied walnuts, citrus' },
+    { name: 'Pan-Seared Scallops', price: '28', desc: 'Cauliflower purée, brown butter' },
+    { name: 'Braised Short Rib', price: '34', desc: 'Red wine, root vegetables, polenta' },
+    { name: 'Grilled Octopus', price: '22', desc: 'Smoked paprika, lemon aioli' }
+  ],
+  hours: 'Mon-Thu 5pm-10pm | Fri-Sat 5pm-11pm | Sun 10am-3pm',
+  // farm vendor
+  marketSchedule: 'Saturdays: Downtown Farmers Market 8am-1pm | Wednesdays: Riverside Market 3pm-7pm',
+  farmProducts: [
+    { name: 'Heirloom Tomatoes', price: '5' },
+    { name: 'Pastured Eggs (dozen)', price: '8' },
+    { name: 'Raw Honey (8oz)', price: '12' },
+    { name: 'Sourdough Loaf', price: '7' }
+  ],
+  preorderItems: 'Thanksgiving Turkey Box • Holiday Pie Sampler • Spring Seedling Bundle',
+  // farm store
+  storeProducts: [
+    { name: 'Farmhouse Cheddar', price: '14', desc: 'Aged 18 months, raw milk' },
+    { name: 'Apple Butter', price: '9', desc: 'Slow-cooked with cinnamon & clove' },
+    { name: 'Smoked Bacon', price: '16', desc: 'Pastured pork, applewood smoked' },
+    { name: 'Fresh Sourdough', price: '7', desc: 'Naturally leavened, 24hr ferment' }
+  ],
+  bulkOrder: 'Yes — half/whole beef shares, seasonal CSA boxes available.',
+  // subscription boxes
+  boxTiers: [
+    { name: 'Seedling Box', price: '39', contents: '3 seasonal veggies, 1 dozen eggs, 1 loaf bread' },
+    { name: 'Harvest Box', price: '69', contents: '6 seasonal veggies, 2 dozen eggs, artisan cheese, bread, jam' },
+    { name: 'Homestead Box', price: '119', contents: 'Full farm share, 3 dozen eggs, cheese, bread, jam, honey, flowers' }
+  ],
+  deliveryInfo: 'Free delivery within 20 miles. Shipped nationwide via insulated cold-pack. Deliveries every Wednesday.',
+  minOrder: '1 box — no commitment, pause or cancel anytime.',
+  // food truck
+  truckMenu: [
+    { name: 'Smash Burger', price: '12' },
+    { name: 'Loaded Fries', price: '9' },
+    { name: 'Fish Tacos (2)', price: '11' },
+    { name: 'BBQ Pulled Pork Sandwich', price: '13' },
+    { name: 'Elote Bowl', price: '10' }
+  ],
+  weeklySchedule: 'Mon: Downtown @ 11am-3pm | Tue: Tech Park @ 11am-2pm | Wed: Brewery Row @ 5pm-9pm | Thu: Medical Center @ 11am-3pm | Fri: Downtown @ 5pm-10pm | Sat: Farmers Market @ 9am-2pm',
+  cateringInfo: 'Full catering available for events 20+. Custom menus, setup & teardown included.',
+  smsNumber: '(503) 555-0199',
+  // distillery
+  spirits: [
+    { name: 'Single Malt Whiskey', price: '68', desc: 'Aged 8 years in ex-bourbon barrels' },
+    { name: 'Barrel-Aged Gin', price: '42', desc: 'Juniper, coriander, rested in oak' },
+    { name: 'Rye Vodka', price: '34', desc: '100% local rye, charcoal-filtered' },
+    { name: 'Apple Brandy', price: '55', desc: 'Heritage apples, copper pot distilled' }
+  ],
+  tastingHours: 'Thu-Fri 3pm-8pm | Sat 12pm-8pm | Sun 12pm-5pm',
+  tourInfo: 'Guided tours every Saturday at 2pm & 4pm. Includes tasting flight. $25/person. Private tours by appointment.',
+  // bakery
+  bakedGoods: [
+    { name: 'Country Sourdough', price: '8' },
+    { name: 'Chocolate Croissant', price: '5' },
+    { name: 'Cinnamon Roll', price: '6' },
+    { name: 'Blueberry Scone', price: '4.50' },
+    { name: 'Bagels (half dozen)', price: '14' },
+    { name: 'Focaccia', price: '9' }
+  ],
+  // coffee shop
+  drinks: [
+    { name: 'Espresso', price: '3.50' },
+    { name: 'Cortado', price: '4.25' },
+    { name: 'Pour-Over', price: '5' },
+    { name: 'Cold Brew', price: '4.50' },
+    { name: 'Matcha Latte', price: '5.50' },
+    { name: 'Chai Latte', price: '5' }
+  ],
+  foodItems: 'Breakfast Burrito $9 • Avocado Toast $11 • Pastry Box $15 • Granola Bowl $8',
+  coffeeEventInfo: 'Open Mic every Thursday 7pm | Latte Art Throwdown 1st Saturday | Live Jazz Sundays 10am'
+};
+
+// ===== TYPE-SPECIFIC FORM RENDERING =====
+const typeLabels = {
+  restaurant: 'Restaurant',
+  farmvendor: 'Farm Vendor',
+  farmstore: 'Farm Store',
+  subscription: 'Subscription Boxes',
+  foodtruck: 'Food Truck',
+  distillery: 'Distillery',
+  bakery: 'Bakery',
+  coffee: 'Coffee Shop'
+};
+
+function renderDynamicFields() {
+  const t = data.type;
+  const el = document.getElementById('dynamic-fields');
+  let html = '';
+
+  // ---- RESTAURANT ----
+  if (t === 'restaurant') {
+    html += '<div class="section-label">Restaurant Details</div>';
+    html += '<div class="form-row"><div class="form-group"><label>Rating</label><input id="f-rating" value="'+esc(data.rating)+'" oninput="d(\'rating\')"></div><div class="form-group"><label>Review Count</label><input id="f-reviews" value="'+esc(data.reviews)+'" oninput="d(\'reviews\')"></div></div>';
+    html += '<div class="form-group"><label>Hours</label><input id="f-hours" value="'+esc(data.hours)+'" oninput="d(\'hours\')"></div>';
+    html += '<div class="section-label">Menu Items (up to 8)</div>';
+    html += '<div id="menu-items-container">';
+    data.menuItems.forEach((mi, i) => {
+      html += '<div class="dynamic-item"><div class="form-row"><div class="form-group"><label>Name</label><input value="'+esc(mi.name)+'" oninput="dArr(\'menuItems\','+i+',\'name\',this.value)"></div><div class="form-group"><label>Price</label><input value="'+esc(mi.price)+'" oninput="dArr(\'menuItems\','+i+',\'price\',this.value)" style="width:80px"></div></div><div class="form-group" style="margin-bottom:0"><label>Description</label><input value="'+esc(mi.desc)+'" oninput="dArr(\'menuItems\','+i+',\'desc\',this.value)"></div></div>';
+    });
+    html += '</div>';
+    html += '<button class="btn-add" onclick="addItem(\'menuItems\',{name:\'\',price:\'\',desc:\'\'},8)">+ Add Menu Item</button>';
+  }
+
+  // ---- FARM VENDOR ----
+  else if (t === 'farmvendor') {
+    html += '<div class="section-label">Farm Vendor Details</div>';
+    html += '<div class="form-group"><label>Market Schedule</label><input id="f-marketSchedule" value="'+esc(data.marketSchedule)+'" oninput="d(\'marketSchedule\')"></div>';
+    html += '<div class="section-label">Products (up to 6)</div><div id="farm-products-container">';
+    data.farmProducts.forEach((p, i) => {
+      html += '<div class="dynamic-item"><div class="form-row"><div class="form-group"><label>Name</label><input value="'+esc(p.name)+'" oninput="dArr(\'farmProducts\','+i+',\'name\',this.value)"></div><div class="form-group"><label>Price</label><input value="'+esc(p.price)+'" oninput="dArr(\'farmProducts\','+i+',\'price\',this.value)" style="width:80px"></div></div></div>';
+    });
+    html += '</div><button class="btn-add" onclick="addItem(\'farmProducts\',{name:\'\',price:\'\'},6)">+ Add Product</button>';
+    html += '<div class="form-group"><label>Pre-order Items</label><input id="f-preorderItems" value="'+esc(data.preorderItems)+'" oninput="d(\'preorderItems\')"></div>';
+  }
+
+  // ---- FARM STORE ----
+  else if (t === 'farmstore') {
+    html += '<div class="section-label">Farm Store Details</div>';
+    html += '<div class="form-group"><label>Hours</label><input id="f-hours" value="'+esc(data.hours||'')+'" oninput="d(\'hours\')"></div>';
+    if (!data.hours) data.hours = 'Mon-Sat 9am-6pm | Sun 10am-4pm';
+    html += '<div class="section-label">Products (up to 6)</div><div id="store-products-container">';
+    data.storeProducts.forEach((p, i) => {
+      html += '<div class="dynamic-item"><div class="form-row"><div class="form-group"><label>Name</label><input value="'+esc(p.name)+'" oninput="dArr(\'storeProducts\','+i+',\'name\',this.value)"></div><div class="form-group"><label>Price</label><input value="'+esc(p.price)+'" oninput="dArr(\'storeProducts\','+i+',\'price\',this.value)" style="width:80px"></div></div><div class="form-group" style="margin-bottom:0"><label>Description</label><input value="'+esc(p.desc)+'" oninput="dArr(\'storeProducts\','+i+',\'desc\',this.value)"></div></div>';
+    });
+    html += '</div><button class="btn-add" onclick="addItem(\'storeProducts\',{name:\'\',price:\'\',desc:\'\'},6)">+ Add Product</button>';
+    html += '<div class="form-group"><label>Bulk Order Info</label><input id="f-bulkOrder" value="'+esc(data.bulkOrder)+'" oninput="d(\'bulkOrder\')"></div>';
+  }
+
+  // ---- SUBSCRIPTION BOXES ----
+  else if (t === 'subscription') {
+    html += '<div class="section-label">Subscription Details</div>';
+    html += '<div id="box-tiers-container">';
+    data.boxTiers.forEach((b, i) => {
+      html += '<div class="dynamic-item"><div class="form-row"><div class="form-group"><label>Tier Name</label><input value="'+esc(b.name)+'" oninput="dArr(\'boxTiers\','+i+',\'name\',this.value)"></div><div class="form-group"><label>Price</label><input value="'+esc(b.price)+'" oninput="dArr(\'boxTiers\','+i+',\'price\',this.value)" style="width:80px"></div></div><div class="form-group" style="margin-bottom:0"><label>Contents</label><input value="'+esc(b.contents)+'" oninput="dArr(\'boxTiers\','+i+',\'contents\',this.value)"></div></div>';
+    });
+    html += '</div>';
+    html += '<div class="form-group"><label>Delivery Info</label><input id="f-deliveryInfo" value="'+esc(data.deliveryInfo)+'" oninput="d(\'deliveryInfo\')"></div>';
+    html += '<div class="form-group"><label>Minimum Order</label><input id="f-minOrder" value="'+esc(data.minOrder)+'" oninput="d(\'minOrder\')"></div>';
+  }
+
+  // ---- FOOD TRUCK ----
+  else if (t === 'foodtruck') {
+    html += '<div class="section-label">Food Truck Details</div>';
+    html += '<div class="form-group"><label>SMS Number</label><input id="f-smsNumber" value="'+esc(data.smsNumber)+'" oninput="d(\'smsNumber\')"></div>';
+    html += '<div class="section-label">Menu Items (up to 6)</div><div id="truck-menu-container">';
+    data.truckMenu.forEach((mi, i) => {
+      html += '<div class="dynamic-item"><div class="form-row"><div class="form-group"><label>Name</label><input value="'+esc(mi.name)+'" oninput="dArr(\'truckMenu\','+i+',\'name\',this.value)"></div><div class="form-group"><label>Price</label><input value="'+esc(mi.price)+'" oninput="dArr(\'truckMenu\','+i+',\'price\',this.value)" style="width:80px"></div></div></div>';
+    });
+    html += '</div><button class="btn-add" onclick="addItem(\'truckMenu\',{name:\'\',price:\'\'},6)">+ Add Menu Item</button>';
+    html += '<div class="form-group"><label>Weekly Schedule</label><textarea id="f-weeklySchedule" oninput="d(\'weeklySchedule\')">'+esc(data.weeklySchedule)+'</textarea></div>';
+    html += '<div class="form-group"><label>Catering Info</label><input id="f-cateringInfo" value="'+esc(data.cateringInfo)+'" oninput="d(\'cateringInfo\')"></div>';
+  }
+
+  // ---- DISTILLERY ----
+  else if (t === 'distillery') {
+    html += '<div class="section-label">Distillery Details</div>';
+    html += '<div class="section-label">Spirits (up to 6)</div><div id="spirits-container">';
+    data.spirits.forEach((s, i) => {
+      html += '<div class="dynamic-item"><div class="form-row"><div class="form-group"><label>Name</label><input value="'+esc(s.name)+'" oninput="dArr(\'spirits\','+i+',\'name\',this.value)"></div><div class="form-group"><label>Price</label><input value="'+esc(s.price)+'" oninput="dArr(\'spirits\','+i+',\'price\',this.value)" style="width:80px"></div></div><div class="form-group" style="margin-bottom:0"><label>Description</label><input value="'+esc(s.desc)+'" oninput="dArr(\'spirits\','+i+',\'desc\',this.value)"></div></div>';
+    });
+    html += '</div><button class="btn-add" onclick="addItem(\'spirits\',{name:\'\',price:\'\',desc:\'\'},6)">+ Add Spirit</button>';
+    html += '<div class="form-group"><label>Tasting Room Hours</label><input id="f-tastingHours" value="'+esc(data.tastingHours)+'" oninput="d(\'tastingHours\')"></div>';
+    html += '<div class="form-group"><label>Tour Info</label><input id="f-tourInfo" value="'+esc(data.tourInfo)+'" oninput="d(\'tourInfo\')"></div>';
+  }
+
+  // ---- BAKERY ----
+  else if (t === 'bakery') {
+    html += '<div class="section-label">Bakery Details</div>';
+    html += '<div class="form-group"><label>Hours</label><input id="f-hours" value="'+esc(data.hours||'')+'" oninput="d(\'hours\')"></div>';
+    if (!data.hours) data.hours = 'Mon-Sat 7am-4pm | Sun 8am-2pm';
+    html += '<div class="section-label">Baked Goods (up to 6)</div><div id="bakery-items-container">';
+    data.bakedGoods.forEach((b, i) => {
+      html += '<div class="dynamic-item"><div class="form-row"><div class="form-group"><label>Name</label><input value="'+esc(b.name)+'" oninput="dArr(\'bakedGoods\','+i+',\'name\',this.value)"></div><div class="form-group"><label>Price</label><input value="'+esc(b.price)+'" oninput="dArr(\'bakedGoods\','+i+',\'price\',this.value)" style="width:80px"></div></div></div>';
+    });
+    html += '</div><button class="btn-add" onclick="addItem(\'bakedGoods\',{name:\'\',price:\'\'},6)">+ Add Item</button>';
+  }
+
+  // ---- COFFEE SHOP ----
+  else if (t === 'coffee') {
+    html += '<div class="section-label">Coffee Shop Details</div>';
+    html += '<div class="form-group"><label>Hours</label><input id="f-hours" value="'+esc(data.hours||'')+'" oninput="d(\'hours\')"></div>';
+    if (!data.hours) data.hours = 'Mon-Fri 6am-7pm | Sat 7am-7pm | Sun 8am-5pm';
+    html += '<div class="section-label">Drinks (up to 6)</div><div id="drinks-container">';
+    data.drinks.forEach((d, i) => {
+      html += '<div class="dynamic-item"><div class="form-row"><div class="form-group"><label>Name</label><input value="'+esc(d.name)+'" oninput="dArr(\'drinks\','+i+',\'name\',this.value)"></div><div class="form-group"><label>Price</label><input value="'+esc(d.price)+'" oninput="dArr(\'drinks\','+i+',\'price\',this.value)" style="width:80px"></div></div></div>';
+    });
+    html += '</div><button class="btn-add" onclick="addItem(\'drinks\',{name:\'\',price:\'\'},6)">+ Add Drink</button>';
+    html += '<div class="form-group"><label>Food Items</label><input id="f-foodItems" value="'+esc(data.foodItems)+'" oninput="d(\'foodItems\')"></div>';
+    html += '<div class="form-group"><label>Events / Specials</label><textarea id="f-coffeeEventInfo" oninput="d(\'coffeeEventInfo\')">'+esc(data.coffeeEventInfo)+'</textarea></div>';
+  }
+
+  el.innerHTML = html;
+}
+
+// ===== DATA BINDING HELPERS =====
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function d(key) {
+  const el = document.getElementById('f-'+key) || document.getElementById('f-'+key.replace(/[A-Z]/g, m=>'-'+m.toLowerCase()));
+  if (el) data[key] = el.value;
+  scheduleUpdate();
+}
+
+function dArr(arrKey, idx, prop, val) {
+  data[arrKey][idx][prop] = val;
+  scheduleUpdate();
+}
+
+function addItem(arrKey, template, max) {
+  if (data[arrKey].length >= max) { alert('Max '+max+' items'); return; }
+  data[arrKey].push({...template});
+  renderDynamicFields();
+  scheduleUpdate();
+}
+
+// ===== DEBOUNCED UPDATE =====
+let updateTimer;
+function scheduleUpdate() {
+  clearTimeout(updateTimer);
+  updateTimer = setTimeout(updatePreview, 500);
+}
+
+// Re-read all form values into data (for fields that bypass d())
+function syncFormData() {
+  // common
+  data.name = document.getElementById('f-name')?.value || data.name;
+  data.tagline = document.getElementById('f-tagline')?.value || data.tagline;
+  data.desc = document.getElementById('f-desc')?.value || data.desc;
+  data.address = document.getElementById('f-address')?.value || data.address;
+  data.phone = document.getElementById('f-phone')?.value || data.phone;
+  const t = data.type;
+  // type-specific simple fields
+  const fMap = {
+    restaurant: ['rating','reviews','hours'],
+    farmvendor: ['marketSchedule','preorderItems'],
+    farmstore: ['hours','bulkOrder'],
+    subscription: ['deliveryInfo','minOrder'],
+    foodtruck: ['smsNumber','weeklySchedule','cateringInfo'],
+    distillery: ['tastingHours','tourInfo'],
+    bakery: ['hours'],
+    coffee: ['hours','foodItems','coffeeEventInfo']
+  };
+  const keys = fMap[t] || [];
+  keys.forEach(k => {
+    const el = document.getElementById('f-'+k);
+    if (el) data[k] = el.value;
+  });
+}
+
+function updatePreview() {
+  syncFormData();
+  const t = data.type;
+  let html;
+  switch(t) {
+    case 'restaurant': html = renderRestaurant(data); break;
+    case 'farmvendor': html = renderFarmVendor(data); break;
+    case 'farmstore': html = renderFarmStore(data); break;
+    case 'subscription': html = renderSubscription(data); break;
+    case 'foodtruck': html = renderFoodTruck(data); break;
+    case 'distillery': html = renderDistillery(data); break;
+    case 'bakery': html = renderBakery(data); break;
+    case 'coffee': html = renderCoffee(data); break;
+    default: html = '<p>Unknown type</p>';
+  }
+  const frame = document.getElementById('preview-frame');
+  frame.srcdoc = html;
+  window._lastHTML = html;
+}
+
+function copyHTML() {
+  syncFormData();
+  const t = data.type;
+  let html;
+  switch(t) {
+    case 'restaurant': html = renderRestaurant(data); break;
+    case 'farmvendor': html = renderFarmVendor(data); break;
+    case 'farmstore': html = renderFarmStore(data); break;
+    case 'subscription': html = renderSubscription(data); break;
+    case 'foodtruck': html = renderFoodTruck(data); break;
+    case 'distillery': html = renderDistillery(data); break;
+    case 'bakery': html = renderBakery(data); break;
+    case 'coffee': html = renderCoffee(data); break;
+  }
+  navigator.clipboard.writeText(html).then(() => {
+    const toast = document.getElementById('copy-toast');
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2000);
+  });
+}
+
+// ===== TYPE SELECTOR =====
+document.getElementById('type-select').addEventListener('change', function() {
+  data.type = this.value;
+  renderDynamicFields();
+  scheduleUpdate();
+});
+
+// ===== SHARED HELPERS =====
+function starRating(r) { var s='';for(var i=0;i<5;i++)s+=i<Math.round(Number(r))?'★':'☆';return s; }
+function subBtn(label) { return '<button onclick="alert(\'Available with full subscription\')" style="padding:12px 32px;font-size:15px;font-weight:700;border-radius:8px;border:2px solid;cursor:pointer;background:#f0f0f0;color:#666;border-color:#ccc;">'+label+'</button>'; }
+function osMap(addr) { var e=encodeURIComponent(addr);return '<iframe width="100%" height="250" frameborder="0" scrolling="no" src="https://www.openstreetmap.org/export/embed.html?bbox=-122.72,45.49,-122.64,45.54&amp;layer=mapnik" style="border-radius:12px;border:1px solid #ddd;"></iframe>'; }
+function footer(name) { return '<div style="text-align:center;padding:2rem 1.5rem;font-size:13px;color:#999;border-top:1px solid #eee;">Preview built for <strong>'+esc(name)+'</strong>. Not yet live. Powered by <strong>SG1 Labs</strong></div>'; }
+
+// ===== REVIEWS BLOCK (shared) =====
+function reviewBlock() {
+  return '<div style="max-width:900px;margin:3rem auto;padding:0 1.5rem;"><h2 style="font-size:28px;font-weight:700;margin-bottom:1.5rem;">What People Are Saying</h2><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1.25rem;">'+
+    '<div style="background:white;padding:1.5rem;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,0.06);"><div style="font-size:20px;color:#f0b90b;margin-bottom:0.5rem;">★★★★★</div><p style="font-size:14px;color:#555;line-height:1.6;margin-bottom:0.5rem;">"Absolutely incredible experience. Every dish was a revelation. Can&rsquo;t wait to come back."</p><strong style="font-size:13px;color:#333;">— Sarah M.</strong></div>'+
+    '<div style="background:white;padding:1.5rem;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,0.06);"><div style="font-size:20px;color:#f0b90b;margin-bottom:0.5rem;">★★★★★</div><p style="font-size:14px;color:#555;line-height:1.6;margin-bottom:0.5rem;">"The attention to detail is unmatched. You can taste the care in every bite."</p><strong style="font-size:13px;color:#333;">— James K.</strong></div>'+
+    '<div style="background:white;padding:1.5rem;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,0.06);"><div style="font-size:20px;color:#f0b90b;margin-bottom:0.5rem;">★★★★☆</div><p style="font-size:14px;color:#555;line-height:1.6;margin-bottom:0.5rem;">"A gem. The atmosphere is warm and inviting. Will definitely be a regular."</p><strong style="font-size:13px;color:#333;">— Priya R.</strong></div>'+
+    '</div></div>';
+}
+
+// ===== 8 TEMPLATE FUNCTIONS =====
+
+function renderRestaurant(d) {
+  return '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>'+esc(d.name)+'</title></head><body style="margin:0;font-family:Georgia,\'Times New Roman\',serif;background:#FDFBF7;color:#5C4033;">'+
+    // Hero
+    '<div style="position:relative;height:420px;background:linear-gradient(135deg,#D4743A 0%,#E8925C 50%,#FDFBF7 100%);display:flex;align-items:center;justify-content:center;text-align:center;">'+
+    '<div style="position:absolute;inset:0;background:url(\'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1200&q=80\') center/cover;opacity:0.25;"></div>'+
+    '<div style="position:relative;z-index:1;padding:2rem;">'+
+    '<h1 style="font-size:52px;font-weight:700;color:#5C4033;margin:0 0 0.5rem;text-shadow:0 2px 4px rgba(255,255,255,0.5);">'+esc(d.name)+'</h1>'+
+    '<p style="font-size:20px;color:#5C4033;margin:0 0 1.5rem;font-style:italic;">'+esc(d.tagline)+'</p>'+
+    '<div style="display:flex;align-items:center;justify-content:center;gap:0.75rem;margin-bottom:1rem;">'+
+    '<span style="font-size:18px;color:#D4743A;">'+starRating(d.rating)+'</span>'+
+    '<span style="font-size:16px;color:#5C4033;">'+esc(d.rating)+' ('+esc(d.reviews)+' reviews)</span></div>'+
+    subBtn('Reserve a Table')+
+    '</div></div>'+
+    // About
+    '<div style="max-width:900px;margin:3rem auto;padding:0 1.5rem;display:flex;gap:2.5rem;align-items:center;flex-wrap:wrap;">'+
+    '<div style="flex:1;min-width:250px;"><h2 style="font-size:28px;font-weight:700;color:#D4743A;margin-bottom:1rem;">Our Story</h2><p style="font-size:16px;line-height:1.8;color:#5C4033;">'+esc(d.desc)+'</p></div>'+
+    '<div style="flex:0 0 280px;height:280px;background:linear-gradient(135deg,#D4743A,#FDFBF7);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff;">Chef Photo</div>'+
+    '</div>'+
+    // Menu
+    '<div style="max-width:900px;margin:3rem auto;padding:0 1.5rem;"><h2 style="font-size:28px;font-weight:700;color:#D4743A;margin-bottom:1.5rem;">Our Menu</h2><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.25rem;">'+
+    (d.menuItems||[]).map(mi => '<div style="background:white;padding:1.25rem;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.05);border-left:3px solid #D4743A;"><div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:0.4rem;"><strong style="font-size:16px;color:#5C4033;">'+esc(mi.name)+'</strong><span style="font-size:16px;font-weight:700;color:#D4743A;">$'+esc(mi.price)+'</span></div><p style="font-size:13px;color:#888;margin:0;">'+esc(mi.desc)+'</p></div>').join('')+
+    '</div></div>'+
+    // Reviews
+    reviewBlock()+
+    // Hours + Map
+    '<div style="max-width:900px;margin:3rem auto;padding:0 1.5rem;display:flex;gap:2rem;flex-wrap:wrap;">'+
+    '<div style="flex:1;min-width:220px;"><h2 style="font-size:28px;font-weight:700;color:#D4743A;margin-bottom:1rem;">Hours &amp; Location</h2><p style="font-size:15px;line-height:1.8;color:#5C4033;">'+esc(d.address)+'<br>'+esc(d.phone)+'</p><p style="font-size:15px;line-height:2;color:#5C4033;white-space:pre-line;">'+esc(d.hours)+'</p></div>'+
+    '<div style="flex:1;min-width:280px;">'+osMap(d.address)+'</div></div>'+
+    // CTA
+    '<div style="text-align:center;padding:3rem 1.5rem;background:linear-gradient(135deg,#D4743A,#E8925C);color:white;margin-top:2rem;">'+
+    '<h2 style="font-size:30px;font-weight:700;margin-bottom:0.75rem;">Ready for an Unforgettable Meal?</h2>'+
+    '<p style="font-size:16px;margin-bottom:1.5rem;opacity:0.9;">Join us tonight. Reservations recommended.</p>'+subBtn('Book Now')+'</div>'+
+    footer(d.name)+
+    '</body></html>';
+}
+
+function renderFarmVendor(d) {
+  return '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>'+esc(d.name)+'</title></head><body style="margin:0;font-family:Georgia,\'Times New Roman\',serif;background:#FDFBF7;color:#5C4033;">'+
+    '<div style="position:relative;height:380px;background:linear-gradient(135deg,#8B9A47 0%,#A3B358 50%,#FDFBF7 100%);display:flex;align-items:center;justify-content:center;text-align:center;">'+
+    '<div style="position:absolute;inset:0;background:url(\'https://images.unsplash.com/photo-1488459717021-fe9256e5c9b0?w=1200&q=80\') center/cover;opacity:0.2;"></div>'+
+    '<div style="position:relative;z-index:1;padding:2rem;">'+
+    '<h1 style="font-size:48px;font-weight:700;color:#5C4033;margin:0 0 0.5rem;">'+esc(d.name)+'</h1>'+
+    '<p style="font-size:20px;color:#5C4033;margin:0 0 1.5rem;font-style:italic;">'+esc(d.tagline)+'</p>'+
+    '</div></div>'+
+    '<div style="max-width:900px;margin:3rem auto;padding:0 1.5rem;display:flex;gap:2.5rem;align-items:center;flex-wrap:wrap;">'+
+    '<div style="flex:0 0 260px;height:260px;background:linear-gradient(135deg,#8B9A47,#FDFBF7);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff;">Farmer Photo</div>'+
+    '<div style="flex:1;min-width:250px;"><h2 style="font-size:28px;font-weight:700;color:#8B9A47;margin-bottom:1rem;">Meet Your Farmer</h2><p style="font-size:16px;line-height:1.8;">'+esc(d.desc)+'</p></div></div>'+
+    '<div style="max-width:900px;margin:3rem auto;padding:0 1.5rem;"><h2 style="font-size:28px;font-weight:700;color:#8B9A47;margin-bottom:1.5rem;">At the Stand Today</h2><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;">'+
+    (d.farmProducts||[]).map(p => '<div style="background:white;padding:1.25rem;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.05);text-align:center;"><strong style="font-size:15px;color:#5C4033;">'+esc(p.name)+'</strong><p style="font-size:18px;font-weight:700;color:#8B9A47;margin:0.4rem 0 0;">$'+esc(p.price)+'</p></div>').join('')+
+    '</div></div>'+
+    '<div style="max-width:900px;margin:3rem auto;padding:0 1.5rem;background:#f0f4e8;border-radius:12px;padding:2rem;"><h2 style="font-size:28px;font-weight:700;color:#8B9A47;margin-bottom:1rem;">Pre-Order for Next Market</h2><p style="font-size:16px;line-height:1.8;color:#5C4033;">'+esc(d.preorderItems)+'</p>'+subBtn('Pre-Order Now')+'</div>'+
+    '<div style="max-width:900px;margin:3rem auto;padding:0 1.5rem;"><h2 style="font-size:28px;font-weight:700;color:#8B9A47;margin-bottom:1rem;">Market Schedule</h2><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1rem;">'+
+    (d.marketSchedule||'').split('|').map(s => '<div style="background:white;padding:1.25rem;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.05);border-left:3px solid #8B9A47;"><p style="font-size:15px;color:#5C4033;margin:0;">'+esc(s.trim())+'</p></div>').join('')+
+    '</div></div>'+
+    reviewBlock()+
+    '<div style="max-width:900px;margin:3rem auto;padding:0 1.5rem;">'+osMap(d.address)+'</div>'+
+    '<div style="text-align:center;padding:3rem 1.5rem;background:linear-gradient(135deg,#8B9A47,#A3B358);color:white;margin-top:2rem;">'+
+    '<h2 style="font-size:30px;font-weight:700;margin-bottom:0.75rem;">See You at the Market!</h2><p style="font-size:16px;margin-bottom:1.5rem;opacity:0.9;">Fresh from our farm to your table.</p>'+subBtn('Get Directions')+'</div>'+
+    footer(d.name)+
+    '</body></html>';
+}
+
+function renderFarmStore(d) {
+  return '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>'+esc(d.name)+'</title></head><body style="margin:0;font-family:Georgia,\'Times New Roman\',serif;background:#FDFBF7;color:#5C4033;">'+
+    '<div style="position:relative;height:380px;background:linear-gradient(135deg,#6A994E 0%,#8BB56A 50%,#FDFBF7 100%);display:flex;align-items:center;justify-content:center;text-align:center;">'+
+    '<div style="position:absolute;inset:0;background:url(\'https://images.unsplash.com/photo-1488459717021-fe9256e5c9b0?w=1200&q=80\') center/cover;opacity:0.2;"></div>'+
+    '<div style="position:relative;z-index:1;padding:2rem;">'+
+    '<h1 style="font-size:48px;font-weight:700;color:#5C4033;margin:0 0 0.5rem;">'+esc(d.name)+'</h1>'+
+    '<p style="font-size:20px;color:#5C4033;margin:0 0 1.5rem;font-style:italic;">'+esc(d.tagline)+'</p>'+
+    '</div></div>'+
+    '<div style="max-width:900px;margin:3rem auto;padding:0 1.5rem;display:flex;gap:2.5rem;align-items:center;flex-wrap:wrap;">'+
+    '<div style="flex:1;min-width:250px;"><h2 style="font-size:28px;font-weight:700;color:#6A994E;margin-bottom:1rem;">Our Family Farm</h2><p style="font-size:16px;line-height:1.8;">'+esc(d.desc)+'</p></div>'+
+    '<div style="flex:0 0 260px;height:260px;background:linear-gradient(135deg,#6A994E,#FDFBF7);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff;">Barn Photo</div>'+
+    '</div>'+
+    '<div style="max-width:900px;margin:3rem auto;padding:0 1.5rem;"><h2 style="font-size:28px;font-weight:700;color:#6A994E;margin-bottom:1.5rem;">Farm Store Goods</h2><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1.25rem;">'+
+    (d.storeProducts||[]).map((p,i) => '<div style="background:white;padding:1.5rem;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.05);position:relative;'+(i===0?'border:1px solid #6A994E;':'')+'">'+(i===0?'<span style="position:absolute;top:-8px;right:12px;background:#6A994E;color:#fff;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700;">Best Seller</span>':'')+'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:0.4rem;"><strong style="font-size:16px;color:#5C4033;">'+esc(p.name)+'</strong><span style="font-size:18px;font-weight:700;color:#6A994E;">$'+esc(p.price)+'</span></div><p style="font-size:13px;color:#888;margin:0;">'+esc(p.desc)+'</p></div>').join('')+
+    '</div></div>'+
+    '<div style="max-width:900px;margin:3rem auto;padding:0 1.5rem;display:flex;gap:2rem;flex-wrap:wrap;">'+
+    '<div style="flex:1;min-width:220px;"><h2 style="font-size:28px;font-weight:700;color:#6A994E;margin-bottom:1rem;">Hours &amp; Location</h2><p style="font-size:15px;line-height:1.8;">'+esc(d.address)+'<br>'+esc(d.phone)+'</p><p style="font-size:15px;line-height:2;white-space:pre-line;">'+esc(d.hours)+'</p></div>'+
+    '<div style="flex:1;min-width:280px;">'+osMap(d.address)+'</div></div>'+
+    '<div style="max-width:900px;margin:3rem auto;padding:0 1.5rem;"><h2 style="font-size:28px;font-weight:700;color:#6A994E;margin-bottom:1rem;">Bulk Orders</h2><p style="font-size:16px;line-height:1.8;">'+esc(d.bulkOrder)+'</p>'+subBtn('Inquire About Bulk Orders')+'</div>'+
+    reviewBlock()+
+    '<div style="text-align:center;padding:3rem 1.5rem;background:linear-gradient(135deg,#6A994E,#8BB56A);color:white;margin-top:2rem;">'+
+    '<h2 style="font-size:30px;font-weight:700;margin-bottom:0.75rem;">Visit the Farm Store</h2><p style="font-size:16px;margin-bottom:1.5rem;opacity:0.9;">Open daily. Real food from real farmers.</p>'+subBtn('Plan Your Visit')+'</div>'+
+    footer(d.name)+
+    '</body></html>';
+}
+
+function renderSubscription(d) {
+  return '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>'+esc(d.name)+'</title></head><body style="margin:0;font-family:Georgia,\'Times New Roman\',serif;background:#FDFBF7;color:#5C4033;">'+
+    '<div style="position:relative;height:380px;background:linear-gradient(135deg,#C17F59 0%,#D4A38C 50%,#FDFBF7 100%);display:flex;align-items:center;justify-content:center;text-align:center;">'+
+    '<div style="position:absolute;inset:0;background:url(\'https://images.unsplash.com/photo-1542838132-92c53300491e?w=1200&q=80\') center/cover;opacity:0.2;"></div>'+
+    '<div style="position:relative;z-index:1;padding:2rem;">'+
+    '<h1 style="font-size:48px;font-weight:700;color:#5C4033;margin:0 0 0.5rem;">'+esc(d.name)+'</h1>'+
+    '<p style="font-size:20px;color:#5C4033;margin:0 0 1.5rem;font-style:italic;">'+esc(d.tagline)+'</p>'+
+    '</div></div>'+
+    '<div style="max-width:900px;margin:3rem auto;padding:0 1.5rem;"><h2 style="font-size:28px;font-weight:700;color:#C17F59;margin-bottom:1rem;">Why We Started</h2><p style="font-size:16px;line-height:1.8;max-width:650px;">'+esc(d.desc)+'</p></div>'+
+    '<div style="max-width:900px;margin:3rem auto;padding:0 1.5rem;"><h2 style="font-size:28px;font-weight:700;color:#C17F59;margin-bottom:1.5rem;">Choose Your Box</h2><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.5rem;">'+
+    (d.boxTiers||[]).map((b,i) => '<div style="background:white;padding:2rem;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,0.06);text-align:center;'+(i===1?'border:2px solid #C17F59;transform:scale(1.03);':'')+'">'+(i===1?'<span style="display:inline-block;background:#C17F59;color:#fff;padding:3px 12px;border-radius:12px;font-size:11px;font-weight:700;margin-bottom:0.75rem;">Most Popular</span><br>':'')+'<h3 style="font-size:20px;font-weight:700;color:#5C4033;margin:0 0 0.5rem;">'+esc(b.name)+'</h3><p style="font-size:32px;font-weight:700;color:#C17F59;margin:0 0 1rem;">$'+esc(b.price)+'<span style="font-size:14px;color:#888;">/mo</span></p><p style="font-size:14px;color:#555;line-height:1.7;margin-bottom:1.25rem;">'+esc(b.contents)+'</p>'+subBtn('Subscribe')+'</div>').join('')+
+    '</div></div>'+
+    '<div style="max-width:900px;margin:3rem auto;padding:0 1.5rem;"><h2 style="font-size:28px;font-weight:700;color:#C17F59;margin-bottom:1.5rem;">How It Works</h2><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1.5rem;">'+
+    '<div style="text-align:center;padding:1.5rem;"><div style="width:56px;height:56px;border-radius:50%;background:#C17F59;color:#fff;font-size:24px;font-weight:700;line-height:56px;margin:0 auto 0.75rem;">1</div><strong style="font-size:15px;color:#5C4033;">Pick Your Box</strong><p style="font-size:13px;color:#888;margin-top:0.4rem;">Choose the size that fits your household</p></div>'+
+    '<div style="text-align:center;padding:1.5rem;"><div style="width:56px;height:56px;border-radius:50%;background:#C17F59;color:#fff;font-size:24px;font-weight:700;line-height:56px;margin:0 auto 0.75rem;">2</div><strong style="font-size:15px;color:#5C4033;">We Harvest &amp; Pack</strong><p style="font-size:13px;color:#888;margin-top:0.4rem;">Fresh from the farm, packed with care</p></div>'+
+    '<div style="text-align:center;padding:1.5rem;"><div style="width:56px;height:56px;border-radius:50%;background:#C17F59;color:#fff;font-size:24px;font-weight:700;line-height:56px;margin:0 auto 0.75rem;">3</div><strong style="font-size:15px;color:#5C4033;">Delivered to You</strong><p style="font-size:13px;color:#888;margin-top:0.4rem;">'+esc(d.deliveryInfo)+'</p></div>'+
+    '</div></div>'+
+    '<div style="max-width:900px;margin:3rem auto;padding:0 1.5rem;background:#fef8f6;border-radius:12px;padding:2rem;"><p style="font-size:14px;color:#C17F59;font-weight:600;margin:0 0 0.25rem;">Flexible terms</p><p style="font-size:16px;line-height:1.8;">'+esc(d.minOrder)+'</p></div>'+
+    reviewBlock()+
+    '<div style="max-width:900px;margin:3rem auto;padding:0 1.5rem;text-align:center;">'+osMap(d.address)+'</div>'+
+    '<div style="text-align:center;padding:3rem 1.5rem;background:linear-gradient(135deg,#C17F59,#D4A38C);color:white;margin-top:2rem;">'+
+    '<h2 style="font-size:30px;font-weight:700;margin-bottom:0.75rem;">Bring the Farm to Your Door</h2><p style="font-size:16px;margin-bottom:1.5rem;opacity:0.9;">Fresh, seasonal, delivered weekly.</p>'+subBtn('Start Your Box')+'</div>'+
+    footer(d.name)+
+    '</body></html>';
+}
+
+function renderFoodTruck(d) {
+  return '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>'+esc(d.name)+'</title></head><body style="margin:0;font-family:Georgia,\'Times New Roman\',sans-serif;background:#2D2D2D;color:#fff;">'+
+    '<div style="position:relative;height:420px;background:linear-gradient(135deg,#1a1a1a 0%,#2D2D2D 60%,#E85D04 100%);display:flex;align-items:center;justify-content:center;text-align:center;">'+
+    '<div style="position:absolute;inset:0;background:url(\'https://images.unsplash.com/photo-1565123409695-7b5ef63a2efb?w=1200&q=80\') center/cover;opacity:0.35;"></div>'+
+    '<div style="position:relative;z-index:1;padding:2rem;">'+
+    '<span style="display:inline-block;background:#E85D04;color:#fff;padding:6px 18px;border-radius:20px;font-size:13px;font-weight:700;letter-spacing:0.05em;margin-bottom:1rem;">🔴 OPEN NOW</span>'+
+    '<h1 style="font-size:52px;font-weight:900;color:#fff;margin:0 0 0.5rem;text-transform:uppercase;letter-spacing:-0.02em;">'+esc(d.name)+'</h1>'+
+    '<p style="font-size:20px;color:#ccc;margin:0;">'+esc(d.tagline)+'</p>'+
+    '</div></div>'+
+    // SMS Bar
+    '<div style="background:#E85D04;color:#fff;text-align:center;padding:0.75rem 1.5rem;font-size:15px;font-weight:600;">📱 Text <strong>'+esc(d.smsNumber)+'</strong> for today&rsquo;s location &amp; specials</div>'+
+    '<div style="max-width:900px;margin:3rem auto;padding:0 1.5rem;"><h2 style="font-size:28px;font-weight:700;color:#E85D04;margin-bottom:1rem;">Our Story</h2><p style="font-size:16px;line-height:1.8;color:#ccc;max-width:650px;">'+esc(d.desc)+'</p></div>'+
+    '<div style="max-width:900px;margin:3rem auto;padding:0 1.5rem;"><h2 style="font-size:28px;font-weight:700;color:#E85D04;margin-bottom:1.5rem;">The Menu</h2><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1rem;">'+
+    (d.truckMenu||[]).map(mi => '<div style="background:#3a3a3a;padding:1.25rem;border-radius:10px;display:flex;justify-content:space-between;align-items:center;"><strong style="font-size:16px;color:#fff;">'+esc(mi.name)+'</strong><span style="font-size:18px;font-weight:700;color:#E85D04;">$'+esc(mi.price)+'</span></div>').join('')+
+    '</div></div>'+
+    '<div style="max-width:900px;margin:3rem auto;padding:0 1.5rem;"><h2 style="font-size:28px;font-weight:700;color:#E85D04;margin-bottom:1.5rem;">Weekly Schedule</h2><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:0.75rem;">'+
+    (d.weeklySchedule||'').split('|').map(s => '<div style="background:#3a3a3a;padding:1rem 1.25rem;border-radius:8px;border-left:3px solid #E85D04;"><p style="font-size:14px;color:#ddd;margin:0;">'+esc(s.trim())+'</p></div>').join('')+
+    '</div></div>'+
+    reviewBlock().replace(/background:white/g,'background:#3a3a3a').replace(/color:#555/g,'color:#ccc').replace(/color:#333/g,'color:#fff').replace(/color:#888/g,'color:#aaa')+
+    '<div style="max-width:900px;margin:3rem auto;padding:0 1.5rem;text-align:center;">'+osMap(d.address)+'</div>'+
+    '<div style="max-width:900px;margin:3rem auto;padding:0 1.5rem;background:#3a3a3a;border-radius:12px;padding:2rem;text-align:center;">'+
+    '<h2 style="font-size:28px;font-weight:700;color:#E85D04;margin-bottom:1rem;">Catering &amp; Events</h2><p style="font-size:16px;line-height:1.8;color:#ccc;">'+esc(d.cateringInfo)+'</p>'+subBtn('Request Catering')+'</div>'+
+    '<div style="text-align:center;padding:3rem 1.5rem;background:linear-gradient(135deg,#E85D04,#f07830);color:white;margin-top:2rem;">'+
+    '<h2 style="font-size:30px;font-weight:700;margin-bottom:0.75rem;">Find Us on the Streets</h2><p style="font-size:16px;margin-bottom:1.5rem;opacity:0.9;">Follow us for daily location updates.</p>'+subBtn('Get the App')+'</div>'+
+    footer(d.name).replace(/border-top:1px solid #eee/,'border-top:1px solid #444').replace(/color:#999/,'color:#666')+
+    '</body></html>';
+}
+
+function renderDistillery(d) {
+  return '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>'+esc(d.name)+'</title></head><body style="margin:0;font-family:Georgia,\'Times New Roman\',serif;background:#FDFBF7;color:#5C3A1E;">'+
+    '<div style="position:relative;height:400px;background:linear-gradient(135deg,#5C3A1E 0%,#A67C3D 50%,#FDFBF7 100%);display:flex;align-items:center;justify-content:center;text-align:center;">'+
+    '<div style="position:absolute;inset:0;background:url(\'https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=1200&q=80\') center/cover;opacity:0.25;"></div>'+
+    '<div style="position:relative;z-index:1;padding:2rem;">'+
+    '<h1 style="font-size:48px;font-weight:700;color:#FDFBF7;margin:0 0 0.5rem;text-shadow:0 2px 8px rgba(0,0,0,0.3);">'+esc(d.name)+'</h1>'+
+    '<p style="font-size:20px;color:#FDFBF7;margin:0;font-style:italic;text-shadow:0 1px 4px rgba(0,0,0,0.3);">'+esc(d.tagline)+'</p>'+
+    '</div></div>'+
+    '<div style="max-width:900px;margin:3rem auto;padding:0 1.5rem;display:flex;gap:2.5rem;align-items:center;flex-wrap:wrap;">'+
+    '<div style="flex:1;min-width:250px;"><h2 style="font-size:28px;font-weight:700;color:#A67C3D;margin-bottom:1rem;">Craft &amp; Tradition</h2><p style="font-size:16px;line-height:1.8;">'+esc(d.desc)+'</p></div>'+
+    '<div style="flex:0 0 260px;height:260px;background:linear-gradient(135deg,#A67C3D,#5C3A1E);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff;">Still Photo</div>'+
+    '</div>'+
+    '<div style="max-width:900px;margin:3rem auto;padding:0 1.5rem;"><h2 style="font-size:28px;font-weight:700;color:#A67C3D;margin-bottom:1.5rem;">Our Spirits</h2><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.25rem;">'+
+    (d.spirits||[]).map((s,i) => '<div style="background:white;padding:1.5rem;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.05);position:relative;">'+(i===0?'<span style="position:absolute;top:-8px;right:12px;background:#A67C3D;color:#fff;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700;">🏆 Award Winner</span>':'')+'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:0.4rem;"><strong style="font-size:16px;color:#5C3A1E;">'+esc(s.name)+'</strong><span style="font-size:18px;font-weight:700;color:#A67C3D;">$'+esc(s.price)+'</span></div><p style="font-size:13px;color:#888;margin:0;">'+esc(s.desc)+'</p></div>').join('')+
+    '</div></div>'+
+    '<div style="max-width:900px;margin:3rem auto;padding:0 1.5rem;display:flex;gap:2rem;flex-wrap:wrap;">'+
+    '<div style="flex:1;min-width:220px;"><h2 style="font-size:28px;font-weight:700;color:#A67C3D;margin-bottom:1rem;">Tasting Room</h2><p style="font-size:15px;line-height:1.8;">'+esc(d.address)+'<br>'+esc(d.phone)+'</p><p style="font-size:15px;line-height:2;white-space:pre-line;">'+esc(d.tastingHours)+'</p></div>'+
+    '<div style="flex:1;min-width:280px;">'+osMap(d.address)+'</div></div>'+
+    '<div style="max-width:900px;margin:3rem auto;padding:0 1.5rem;background:#f8f5f0;border-radius:12px;padding:2rem;">'+
+    '<h2 style="font-size:28px;font-weight:700;color:#A67C3D;margin-bottom:1rem;">Distillery Tours</h2><p style="font-size:16px;line-height:1.8;">'+esc(d.tourInfo)+'</p>'+subBtn('Book a Tour')+'</div>'+
+    reviewBlock()+
+    '<div style="text-align:center;padding:3rem 1.5rem;background:linear-gradient(135deg,#5C3A1E,#A67C3D);color:white;margin-top:2rem;">'+
+    '<h2 style="font-size:30px;font-weight:700;margin-bottom:0.75rem;">Taste the Craft</h2><p style="font-size:16px;margin-bottom:1.5rem;opacity:0.9;">Visit our tasting room this weekend.</p>'+subBtn('Plan Your Visit')+'</div>'+
+    footer(d.name)+
+    '</body></html>';
+}
+
+function renderBakery(d) {
+  return '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>'+esc(d.name)+'</title></head><body style="margin:0;font-family:Georgia,\'Times New Roman\',serif;background:#FFFBF5;color:#8B5E3C;">'+
+    '<div style="position:relative;height:380px;background:linear-gradient(135deg,#D97A2B 0%,#F0A65C 50%,#FFFBF5 100%);display:flex;align-items:center;justify-content:center;text-align:center;">'+
+    '<div style="position:absolute;inset:0;background:url(\'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=1200&q=80\') center/cover;opacity:0.25;"></div>'+
+    '<div style="position:relative;z-index:1;padding:2rem;">'+
+    '<h1 style="font-size:48px;font-weight:700;color:#8B5E3C;margin:0 0 0.5rem;">'+esc(d.name)+'</h1>'+
+    '<p style="font-size:20px;color:#8B5E3C;margin:0;font-style:italic;">'+esc(d.tagline)+'</p>'+
+    '</div></div>'+
+    '<div style="max-width:900px;margin:3rem auto;padding:0 1.5rem;display:flex;gap:2.5rem;align-items:center;flex-wrap:wrap;">'+
+    '<div style="flex:0 0 260px;height:260px;background:linear-gradient(135deg,#D97A2B,#FFFBF5);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff;">Baker Photo</div>'+
+    '<div style="flex:1;min-width:250px;"><h2 style="font-size:28px;font-weight:700;color:#D97A2B;margin-bottom:1rem;">Our Kitchen</h2><p style="font-size:16px;line-height:1.8;">'+esc(d.desc)+'</p></div></div>'+
+    '<div style="max-width:900px;margin:3rem auto;padding:0 1.5rem;"><h2 style="font-size:28px;font-weight:700;color:#D97A2B;margin-bottom:1.5rem;">Fresh from the Oven</h2><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;">'+
+    (d.bakedGoods||[]).map((b,i) => '<div style="background:white;padding:1.25rem;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.05);text-align:center;position:relative;">'+(i===0?'<span style="position:absolute;top:-8px;right:12px;background:#D97A2B;color:#fff;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700;">Best Seller</span>':'')+'<strong style="font-size:15px;color:#8B5E3C;">'+esc(b.name)+'</strong><p style="font-size:18px;font-weight:700;color:#D97A2B;margin:0.4rem 0 0;">$'+esc(b.price)+'</p></div>').join('')+
+    '</div></div>'+
+    '<div style="max-width:900px;margin:3rem auto;padding:0 1.5rem;display:flex;gap:2rem;flex-wrap:wrap;">'+
+    '<div style="flex:1;min-width:220px;"><h2 style="font-size:28px;font-weight:700;color:#D97A2B;margin-bottom:1rem;">Hours &amp; Location</h2><p style="font-size:15px;line-height:1.8;">'+esc(d.address)+'<br>'+esc(d.phone)+'</p><p style="font-size:15px;line-height:2;white-space:pre-line;">'+esc(d.hours)+'</p></div>'+
+    '<div style="flex:1;min-width:280px;">'+osMap(d.address)+'</div></div>'+
+    reviewBlock()+
+    '<div style="text-align:center;padding:3rem 1.5rem;background:linear-gradient(135deg,#D97A2B,#F0A65C);color:white;margin-top:2rem;">'+
+    '<h2 style="font-size:30px;font-weight:700;margin-bottom:0.75rem;">Stop By for Something Fresh</h2><p style="font-size:16px;margin-bottom:1.5rem;opacity:0.9;">Baked daily. First come, first served.</p>'+subBtn('Order Ahead')+'</div>'+
+    footer(d.name)+
+    '</body></html>';
+}
+
+function renderCoffee(d) {
+  return '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>'+esc(d.name)+'</title></head><body style="margin:0;font-family:Georgia,\'Times New Roman\',serif;background:#FCF9F5;color:#3C2415;">'+
+    '<div style="position:relative;height:380px;background:linear-gradient(135deg,#8B6340 0%,#B38B6B 50%,#FCF9F5 100%);display:flex;align-items:center;justify-content:center;text-align:center;">'+
+    '<div style="position:absolute;inset:0;background:url(\'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=1200&q=80\') center/cover;opacity:0.2;"></div>'+
+    '<div style="position:relative;z-index:1;padding:2rem;">'+
+    '<h1 style="font-size:48px;font-weight:700;color:#3C2415;margin:0 0 0.5rem;">'+esc(d.name)+'</h1>'+
+    '<p style="font-size:20px;color:#3C2415;margin:0;font-style:italic;">'+esc(d.tagline)+'</p>'+
+    '</div></div>'+
+    '<div style="max-width:900px;margin:3rem auto;padding:0 1.5rem;"><h2 style="font-size:28px;font-weight:700;color:#8B6340;margin-bottom:1rem;">Our Story</h2><p style="font-size:16px;line-height:1.8;max-width:650px;">'+esc(d.desc)+'</p></div>'+
+    // Drink Menu
+    '<div style="max-width:900px;margin:3rem auto;padding:0 1.5rem;"><h2 style="font-size:28px;font-weight:700;color:#8B6340;margin-bottom:1.5rem;">Drinks</h2><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1rem;">'+
+    (d.drinks||[]).map(dr => '<div style="background:white;padding:1.25rem;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.05);display:flex;justify-content:space-between;align-items:center;border-left:3px solid #8B6340;"><strong style="font-size:15px;color:#3C2415;">'+esc(dr.name)+'</strong><span style="font-size:17px;font-weight:700;color:#8B6340;">$'+esc(dr.price)+'</span></div>').join('')+
+    '</div></div>'+
+    // Food Bites
+    '<div style="max-width:900px;margin:3rem auto;padding:0 1.5rem;"><h2 style="font-size:28px;font-weight:700;color:#8B6340;margin-bottom:1.5rem;">Food Bites</h2><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1rem;">'+
+    (d.foodItems||'').split('•').map(f => '<div style="background:white;padding:1.25rem;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.05);text-align:center;"><p style="font-size:15px;color:#3C2415;margin:0;">'+esc(f.trim())+'</p></div>').join('')+
+    '</div></div>'+
+    // Hours with events
+    '<div style="max-width:900px;margin:3rem auto;padding:0 1.5rem;display:flex;gap:2rem;flex-wrap:wrap;">'+
+    '<div style="flex:1;min-width:220px;"><h2 style="font-size:28px;font-weight:700;color:#8B6340;margin-bottom:1rem;">Hours &amp; Events</h2><p style="font-size:15px;line-height:1.8;">'+esc(d.address)+'<br>'+esc(d.phone)+'</p><p style="font-size:15px;line-height:2;white-space:pre-line;">'+esc(d.hours)+'</p>'+
+    '<div style="margin-top:1rem;background:#f6f1eb;padding:1rem;border-radius:8px;"><strong style="font-size:14px;color:#8B6340;">Events</strong><p style="font-size:14px;line-height:1.7;margin:0.4rem 0 0;white-space:pre-line;">'+esc(d.coffeeEventInfo)+'</p></div></div>'+
+    '<div style="flex:1;min-width:280px;">'+osMap(d.address)+'</div></div>'+
+    reviewBlock()+
+    '<div style="text-align:center;padding:3rem 1.5rem;background:linear-gradient(135deg,#8B6340,#B38B6B);color:white;margin-top:2rem;">'+
+    '<h2 style="font-size:30px;font-weight:700;margin-bottom:0.75rem;">Your New Favorite Cup Awaits</h2><p style="font-size:16px;margin-bottom:1.5rem;opacity:0.9;">Single-origin beans. Expertly pulled shots. Welcoming space.</p>'+subBtn('Order Online')+'</div>'+
+    footer(d.name)+
+    '</body></html>';
+}
+
+// ===== INIT =====
+renderDynamicFields();
+updatePreview();
+</script>
+</body>
+</html>
