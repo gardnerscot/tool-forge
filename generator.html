@@ -643,6 +643,28 @@ function renderCoffee(d) {
     '</body></html>';
 }
 
+// ===== URL PARAM PRE-FILL (from Finder) =====
+(function() {
+  var params = new URLSearchParams(window.location.search);
+  var type = params.get('type');
+  if (!type) return;
+  var typeSelect = document.getElementById('type-select');
+  var validTypes = Array.from(typeSelect.options).map(function(o) { return o.value; });
+  if (validTypes.indexOf(type) === -1) return;
+  typeSelect.value = type;
+  data.type = type;
+  // Pre-fill common fields
+  var name = params.get('name');
+  var addr = params.get('address');
+  if (name) data.name = decodeURIComponent(name);
+  if (addr) data.address = decodeURIComponent(addr);
+  renderDynamicFields();
+  // Fill visible form fields after rendering
+  if (name) { var nf = document.getElementById('f-name'); if (nf) nf.value = data.name; }
+  if (addr) { var af = document.getElementById('f-address'); if (af) af.value = data.address; }
+  updatePreview();
+})();
+
 // ===== INIT =====
 renderDynamicFields();
 updatePreview();
