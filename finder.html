@@ -294,6 +294,24 @@
   .result-card .rc-actions {
     text-align: right;
   }
+  .result-card .rc-stats {
+    font-size: 0.85rem;
+    color: #f0c040;
+    margin-top: 6px;
+  }
+  .result-card .rc-stats .rc-reviews {
+    color: var(--text-muted);
+    margin-left: 4px;
+  }
+  .stars {
+    color: #f0c040;
+    font-weight: 600;
+  }
+  .rating-cell {
+    color: #f0c040;
+    font-weight: 600;
+    white-space: nowrap;
+  }
 
   /* Summary */
   .results-summary {
@@ -340,7 +358,7 @@
 <div class="container">
   <header>
     <h1>SG1 Labs <span>Lead Finder</span></h1>
-    <p>Discover local food businesses using OpenStreetMap</p>
+    <p>Discover local food businesses for your website service</p>
   </header>
 
   <div class="controls">
@@ -387,7 +405,7 @@
       <tr>
         <th>Name</th>
         <th>Address</th>
-        <th>Contact</th>
+        <th>Rating</th>
         <th></th>
       </tr>
     </thead>
@@ -417,16 +435,18 @@
 
   // ── OSM tag mappings ────────────────────────────────────────
   const stateSelect   = document.getElementById('state');
-  var CATEGORIES = {
-    restaurant:  'restaurant',
-    cafe:        'cafe',
-    bakery:      'bakery',
-    farm:        'farm+stand',
-    distillery:  'distillery',
-    food_truck:  'food+truck',
-    butcher:     'butcher',
-    market:      'farmers+market'
+  var PLACE_TYPES = {
+    restaurant:  ['restaurant'],
+    cafe:        ['cafe'],
+    bakery:      ['bakery'],
+    farm:        ['farm'],
+    distillery:  null, // uses text search
+    food_truck:  ['meal_takeaway'],
+    butcher:     ['butcher_shop'],
+    market:      ['market']
   };
+
+  var API_KEY = 'AIzaSyD_FEVERCTC53KjaMzhNCXtCG5oC4dh8U0';
 
   // ── UI helpers ──────────────────────────────────────────────
   radiusSlider.addEventListener('input', function() {
@@ -478,21 +498,10 @@
     return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
-  // ── Build display address from Nominatim result ────────────
-  function buildAddress(item) {
-    var addr = item.address || {};
-    var parts = [];
-    if (addr.road && addr.house_number) parts.push(addr.house_number + ' ' + addr.road);
-    else if (addr.road) parts.push(addr.road);
-    if (addr.town || addr.city || addr.village) parts.push(addr.town || addr.city || addr.village);
-    if (addr.state) parts.push(addr.state);
-    return parts.join(', ') || item.display_name || '';
-  }
-
-  // ── Build preview URL ───────────────────────────────────────
-  function previewUrl(type, item) {
-    var name = item.name || 'Unnamed';
-    var addr = buildAddress(item) || '';
+  // ── Build preview URL from Places result ────────────────────
+  function previewUrl(type, place) {
+    var name = (place.displayName && place.displayName.text) || place.name || 'Unnamed';
+    var addr = place.formattedAddress || '';
     var params = new URLSearchParams();
     params.set('type', type);
     params.set('name', name);
@@ -500,75 +509,120 @@
     return './generator.html?' + params.toString();
   }
 
-  // ── Render results ──────────────────────────────────────────
-  function renderResults(items, type) {
+  // ── Render Places results ───────────────────────────────────
+  function renderPlaces(places, type) {
     statusDiv.innerHTML = '';
 
-    if (!items || items.length === 0) {
+    if (!places || places.length === 0) {
       summaryDiv.textContent = 'No results found.';
       summaryDiv.style.display = 'block';
       showEmpty('No businesses found. Try a different town or category.');
       return;
     }
 
-    summaryDiv.textContent = 'Found ' + items.length + ' result' + (items.length !== 1 ? 's' : '');
+    summaryDiv.textContent = 'Found ' + places.length + ' result' + (places.length !== 1 ? 's' : '');
     summaryDiv.style.display = 'block';
 
-    // Sort by name
-    items.sort(function(a, b) {
-      var na = (a.name || '').toLowerCase();
-      var nb = (b.name || '').toLowerCase();
+    // Sort by rating (highest first), then name
+    places.sort(function(a, b) {
+      var ra = a.rating || 0;
+      var rb = b.rating || 0;
+      if (ra !== rb) return rb - ra;
+      var na = ((a.displayName && a.displayName.text) || '').toLowerCase();
+      var nb = ((b.displayName && b.displayName.text) || '').toLowerCase();
       return na < nb ? -1 : na > nb ? 1 : 0;
     });
 
     // Build table rows
     tbody.innerHTML = '';
-    for (var i = 0; i < items.length; i++) {
-      var item = items[i];
-      var name = escapeHtml(item.name || 'Unnamed');
-      var addr = escapeHtml(buildAddress(item) || '—');
-      var pUrl = previewUrl(type, item);
+    for (var i = 0; i < places.length; i++) {
+      var p = places[i];
+      var name = escapeHtml((p.displayName && p.displayName.text) || 'Unnamed');
+      var addr = escapeHtml(p.formattedAddress || '—');
+      var rating = p.rating ? ('★ ' + p.rating.toFixed(1)) : '';
+      var reviews = p.userRatingCount ? (' (' + p.userRatingCount + ')') : '';
+      var pUrl = previewUrl(type, p);
 
       var tr = document.createElement('tr');
       tr.innerHTML =
         '<td class="name-cell">' + name + '</td>' +
         '<td class="address-cell">' + addr + '</td>' +
-        '<td>' + (item.class || item.type || '') + '</td>' +
+        '<td class="rating-cell">' + (rating ? '<span class="stars">' + rating + '</span>' + reviews : '') + '</td>' +
         '<td><a class="btn-preview" href="' + pUrl + '">Generate Preview &rarr;</a></td>';
       tbody.appendChild(tr);
     }
 
     // Build cards
     cardsDiv.innerHTML = '';
-    for (var j = 0; j < items.length; j++) {
-      var citem = items[j];
-      var cname = escapeHtml(citem.name || 'Unnamed');
-      var caddr = escapeHtml(buildAddress(citem) || '—');
-      var cpUrl = previewUrl(type, citem);
+    for (var j = 0; j < places.length; j++) {
+      var cp = places[j];
+      var cname = escapeHtml((cp.displayName && cp.displayName.text) || 'Unnamed');
+      var caddr = escapeHtml(cp.formattedAddress || '—');
+      var crating = cp.rating ? ('<span class="stars">★ ' + cp.rating.toFixed(1) + '</span>') : '';
+      var creviews = cp.userRatingCount || '';
+      var cpUrl = previewUrl(type, cp);
 
       var card = document.createElement('div');
       card.className = 'result-card';
       card.innerHTML =
         '<div class="rc-name">' + cname + '</div>' +
         '<div class="rc-address">' + caddr + '</div>' +
+        '<div class="rc-stats">' + crating + (creviews ? ' <span class="rc-reviews">' + creviews + ' reviews</span>' : '') + '</div>' +
         '<div class="rc-actions"><a class="btn-preview" href="' + cpUrl + '">Generate Preview &rarr;</a></div>';
       cardsDiv.appendChild(card);
     }
   }
 
-  // ── Query Nominatim API ─────────────────────────────────────
-  async function queryNominatim(category, town) {
-    var q = encodeURIComponent(category + ' in ' + town);
-    var url = 'https://nominatim.openstreetmap.org/search?q=' + q + '&format=json&limit=20&addressdetails=1';
-    var resp = await fetch(url, {
-      headers: { 'Accept': 'application/json' }
-    });
-    if (!resp.ok) throw new Error('Nominatim API error (HTTP ' + resp.status + ')');
+  // ── Geocode via Google ─────────────────────────────────────
+  async function geocode(query) {
+    var url = 'https://maps.googleapis.com/maps/api/geocode/json?address=' + encodeURIComponent(query) + '&key=' + API_KEY;
+    var resp = await fetch(url);
+    if (!resp.ok) throw new Error('Geocoding failed');
     var data = await resp.json();
-    return data || [];
+    if (data.status !== 'OK' || !data.results.length) throw new Error('Town not found');
+    var loc = data.results[0].geometry.location;
+    return { lat: loc.lat, lon: loc.lng };
   }
 
-  // ── Main search handler (Nominatim — no geocode needed) ────
+  // ── Search Google Places Nearby ─────────────────────────────
+  async function searchNearby(types, lat, lon) {
+    var resp = await fetch('https://places.googleapis.com/v1/places:searchNearby', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Goog-Api-Key': API_KEY,
+        'X-Goog-FieldMask': 'places.displayName,places.formattedAddress,places.rating,places.userRatingCount,places.types'
+      },
+      body: JSON.stringify({
+        includedTypes: types,
+        maxResultCount: 20,
+        locationRestriction: {
+          circle: { center: { latitude: lat, longitude: lon }, radius: 10000 }
+        }
+      })
+    });
+    if (!resp.ok) throw new Error('Places API error (HTTP ' + resp.status + ')');
+    var data = await resp.json();
+    return data.places || [];
+  }
+
+  // ── Search Google Places Text (for distilleries) ────────────
+  async function searchText(query) {
+    var resp = await fetch('https://places.googleapis.com/v1/places:searchText', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Goog-Api-Key': API_KEY,
+        'X-Goog-FieldMask': 'places.displayName,places.formattedAddress,places.rating,places.userRatingCount,places.types'
+      },
+      body: JSON.stringify({ textQuery: query, maxResultCount: 20 })
+    });
+    if (!resp.ok) throw new Error('Places API error (HTTP ' + resp.status + ')');
+    var data = await resp.json();
+    return data.places || [];
+  }
+
+  // ── Main search handler (Google Places) ─────────────────────
   searchBtn.addEventListener('click', async function() {
     var town = townInput.value.trim();
     var state = stateSelect.value;
@@ -588,31 +642,31 @@
     showLoading();
 
     try {
-      var searchTerm = CATEGORIES[category] || category;
-      var results = await queryNominatim(searchTerm, location);
+      var results;
 
-      // Distillery category: also search for breweries (Nominatim misses craft=distillery)
       if (category === 'distillery') {
-        try {
-          var brewResults = await queryNominatim('brewery', location);
-          results = results.concat(brewResults);
-        } catch (e) {
-          console.warn('Brewery sub-query failed:', e);
-        }
+        // Text search for distilleries + breweries
+        results = await searchText('distillery OR brewery in ' + location);
+      } else {
+        var types = PLACE_TYPES[category];
+        var geo = await geocode(location);
+        results = await searchNearby(types, geo.lat, geo.lon);
       }
 
-      // Deduplicate by place_id
+      // Deduplicate by place id
       var seen = {};
-      results = results.filter(function(el) {
-        if (seen[el.place_id]) return false;
-        seen[el.place_id] = true;
+      results = results.filter(function(p) {
+        var id = p.id || p.name;
+        if (seen[id]) return false;
+        seen[id] = true;
         return true;
       });
-      renderResults(results, category);
+
+      renderPlaces(results, category);
 
     } catch (err) {
       console.error(err);
-      showError(err.message || 'Something went wrong. The OpenStreetMap servers may be busy — try again in a moment.');
+      showError(err.message || 'Something went wrong. Please try again.');
     } finally {
       searchBtn.disabled = false;
     }
