@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SG1 Labs — Local Business Finder</title>
+<style>
+  :root {
+    --bg: #1a1a2e;
+    --card: #16213e;
+    --accent: #e94560;
+    --accent-hover: #ff6b81;
+    --border: #0f3460;
+    --text: #eaeaea;
+    --text-muted: #8892b0;
+    --input-bg: #0f1a2f;
+    --success: #2ecc71;
+    --radius: 8px;
+  }
+  *, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+  .container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 24px 16px 48px;
+  }
+  header {
+    text-align: center;
+    padding: 32px 0 24px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 32px;
+  }
+  header h1 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--text);
+  }
+  header h1 span {
+    color: var(--accent);
+  }
+  header p {
+    color: var(--text-muted);
+    margin-top: 4px;
+    font-size: 0.95rem;
+  }
+
+  /* Controls */
+  .controls {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    margin-bottom: 24px;
+  }
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+    min-width: 180px;
+  }
+  .field label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+  }
+  .field input, .field select {
+    background: var(--input-bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 10px 12px;
+    border-radius: var(--radius);
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+  }
+  .field input:focus, .field select:focus {
+    border-color: var(--accent);
+  }
+  .field input::placeholder {
+    color: var(--text-muted);
+    opacity: 0.7;
+  }
+
+  /* Radius slider */
+  .radius-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .radius-group input[type=range] {
+    flex: 1;
+    min-width: 80px;
+    accent-color: var(--accent);
+  }
+  .radius-value {
+    font-size: 0.85rem;
+    color: var(--accent);
+    font-weight: 600;
+    min-width: 52px;
+    text-align: right;
+  }
+
+  /* Search button */
+  .btn {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    padding: 10px 24px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    border-radius: var(--radius);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.2s, transform 0.1s;
+    height: 43px;
+  }
+  .btn:hover {
+    background: var(--accent-hover);
+  }
+  .btn:active {
+    transform: scale(0.97);
+  }
+  .btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* Status area */
+  .status {
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 24px;
+  }
+  .spinner {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    margin-right: 10px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-text {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+  }
+  .error-msg {
+    background: rgba(233, 69, 96, 0.12);
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    padding: 10px 16px;
+    border-radius: var(--radius);
+    font-size: 0.9rem;
+    text-align: center;
+  }
+  .empty-msg {
+    color: var(--text-muted);
+    text-align: center;
+    font-size: 0.95rem;
+    padding: 32px 0;
+  }
+
+  /* Results table (desktop) */
+  .results-table {
+    width: 100%;
+    border-collapse: collapse;
+    display: none;
+  }
+  .results-table thead th {
+    text-align: left;
+    padding: 10px 12px;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    border-bottom: 2px solid var(--border);
+  }
+  .results-table tbody td {
+    padding: 12px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+    font-size: 0.9rem;
+  }
+  .results-table tbody tr:hover {
+    background: rgba(15, 52, 96, 0.3);
+  }
+  .results-table .name-cell {
+    font-weight: 600;
+    color: var(--text);
+  }
+  .results-table .address-cell {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+  }
+  .results-table .link-cell a {
+    color: var(--accent);
+    text-decoration: none;
+    font-size: 0.85rem;
+  }
+  .results-table .link-cell a:hover {
+    text-decoration: underline;
+  }
+  .btn-preview {
+    display: inline-block;
+    background: var(--border);
+    color: var(--text);
+    border: 1px solid var(--accent);
+    padding: 6px 14px;
+    border-radius: var(--radius);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.2s, color 0.2s;
+    white-space: nowrap;
+  }
+  .btn-preview:hover {
+    background: var(--accent);
+    color: #fff;
+  }
+
+  /* Result cards (mobile) */
+  .results-cards {
+    display: none;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .result-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    transition: border-color 0.2s;
+  }
+  .result-card:hover {
+    border-color: var(--accent);
+  }
+  .result-card .rc-name {
+    font-weight: 700;
+    font-size: 1rem;
+    margin-bottom: 4px;
+  }
+  .result-card .rc-address {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    margin-bottom: 6px;
+  }
+  .result-card .rc-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .result-card .rc-links a {
+    color: var(--accent);
+    font-size: 0.85rem;
+    text-decoration: none;
+  }
+  .result-card .rc-links a:hover {
+    text-decoration: underline;
+  }
+  .result-card .rc-actions {
+    text-align: right;
+  }
+
+  /* Summary */
+  .results-summary {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+    display: none;
+  }
+
+  /* Footer */
+  .attribution {
+    text-align: center;
+    padding: 24px 0;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    border-top: 1px solid var(--border);
+    margin-top: 40px;
+  }
+  .attribution a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+  .attribution a:hover {
+    text-decoration: underline;
+  }
+
+  /* Responsive breakpoints */
+  @media (min-width: 640px) {
+    .results-table { display: table; }
+    .results-cards { display: none; }
+    .results-summary { display: block; }
+  }
+  @media (max-width: 639px) {
+    .results-cards { display: flex; }
+    .results-table { display: none; }
+    .results-summary { display: block; }
+    .controls { flex-direction: column; }
+    .field { min-width: 100%; }
+    .btn { width: 100%; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>SG1 Labs <span>Lead Finder</span></h1>
+    <p>Discover local food businesses using OpenStreetMap</p>
+  </header>
+
+  <div class="controls">
+    <div class="field">
+      <label for="town">Town / City</label>
+      <input type="text" id="town" placeholder="e.g. Gettysburg PA" autofocus>
+    </div>
+    <div class="field">
+      <label for="category">Category</label>
+      <select id="category">
+        <option value="">-- Choose --</option>
+        <option value="restaurant">Restaurants</option>
+        <option value="cafe">Cafes &amp; Coffee</option>
+        <option value="bakery">Bakeries</option>
+        <option value="farm">Farms &amp; Produce</option>
+        <option value="distillery">Distilleries &amp; Breweries</option>
+        <option value="food_truck">Food Trucks</option>
+        <option value="butcher">Butchers &amp; Meat</option>
+        <option value="marketplace">Markets</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="radius">Radius</label>
+      <div class="radius-group">
+        <input type="range" id="radius" min="1" max="20" value="5" step="1">
+        <span class="radius-value" id="radiusVal">5 km</span>
+      </div>
+    </div>
+    <button class="btn" id="searchBtn">Search</button>
+  </div>
+
+  <div class="status" id="status">
+    <p class="empty-msg" id="emptyMsg">Enter a town and pick a category to find businesses</p>
+  </div>
+
+  <div class="results-summary" id="summary"></div>
+
+  <div class="results-cards" id="cards"></div>
+  <table class="results-table" id="table">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Address</th>
+        <th>Contact</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody id="tbody"></tbody>
+  </table>
+
+  <div class="attribution">
+    Powered by <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> &mdash; data &copy; OSM contributors
+  </div>
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  // ── DOM refs ────────────────────────────────────────────────
+  const townInput    = document.getElementById('town');
+  const catSelect    = document.getElementById('category');
+  const radiusSlider = document.getElementById('radius');
+  const radiusVal    = document.getElementById('radiusVal');
+  const searchBtn    = document.getElementById('searchBtn');
+  const statusDiv    = document.getElementById('status');
+  const emptyMsg     = document.getElementById('emptyMsg');
+  const summaryDiv   = document.getElementById('summary');
+  const cardsDiv     = document.getElementById('cards');
+  const tbody        = document.getElementById('tbody');
+
+  // ── OSM tag mappings ────────────────────────────────────────
+  const TAG_MAP = {
+    restaurant:  { tag: ['amenity','restaurant'] },
+    cafe:        { tag: ['amenity','cafe'] },
+    bakery:      { tag: ['shop','bakery'] },
+    farm:        { tag: ['shop','farm'] },
+    distillery:  { tag: ['craft','distillery'] },
+    brewery:     { tag: ['craft','brewery'] },
+    food_truck:  { tag: ['amenity','fast_food'] },
+    butcher:     { tag: ['shop','butcher'] },
+    marketplace: { tag: ['amenity','marketplace'] }
+  };
+
+  // ── UI helpers ──────────────────────────────────────────────
+  radiusSlider.addEventListener('input', function() {
+    radiusVal.textContent = this.value + ' km';
+  });
+
+  // Allow Enter key to trigger search
+  townInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') searchBtn.click();
+  });
+  catSelect.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') searchBtn.click();
+  });
+
+  function clearResults() {
+    tbody.innerHTML = '';
+    cardsDiv.innerHTML = '';
+    summaryDiv.textContent = '';
+    summaryDiv.style.display = 'none';
+    emptyMsg.style.display = 'none';
+  }
+
+  function showStatus(html, isError) {
+    clearResults();
+    statusDiv.innerHTML = html;
+    if (isError) {
+      // keep error visible
+    }
+  }
+
+  function showLoading() {
+    statusDiv.innerHTML = '<span class="spinner"></span><span class="loading-text">Searching...</span>';
+    emptyMsg.style.display = 'none';
+  }
+
+  function showError(msg) {
+    statusDiv.innerHTML = '<div class="error-msg">' + escapeHtml(msg) + '</div>';
+  }
+
+  function showEmpty(msg) {
+    emptyMsg.style.display = 'block';
+    emptyMsg.textContent = msg || 'Enter a town and pick a category to find businesses';
+    statusDiv.innerHTML = '';
+    statusDiv.appendChild(emptyMsg);
+  }
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // ── Build full address from OSM tags ────────────────────────
+  function buildAddress(tags) {
+    const parts = [];
+    const street = tags['addr:street'];
+    const number = tags['addr:housenumber'];
+    if (number && street) parts.push(number + ' ' + street);
+    else if (street) parts.push(street);
+    else if (number) parts.push(number);
+    if (tags['addr:city']) parts.push(tags['addr:city']);
+    else if (tags['addr:town']) parts.push(tags['addr:town']);
+    if (tags['addr:state']) parts.push(tags['addr:state']);
+    if (tags['addr:postcode']) parts.push(tags['addr:postcode']);
+    return parts.join(', ') || null;
+  }
+
+  // ── Build preview URL ───────────────────────────────────────
+  function previewUrl(type, el) {
+    const tags = el.tags || {};
+    const name = tags.name || 'Unnamed';
+    const addr = buildAddress(tags) || '';
+    const phone = tags.phone || tags['contact:phone'] || '';
+    const website = tags.website || tags['contact:website'] || '';
+    const params = new URLSearchParams();
+    params.set('type', type);
+    params.set('name', name);
+    if (addr) params.set('address', addr);
+    if (phone) params.set('phone', phone);
+    if (website) params.set('website', website);
+    return './generator.html?' + params.toString();
+  }
+
+  // ── Render results ──────────────────────────────────────────
+  function renderResults(elements, type) {
+    statusDiv.innerHTML = '';
+
+    if (!elements || elements.length === 0) {
+      summaryDiv.textContent = 'No results found.';
+      summaryDiv.style.display = 'block';
+      showEmpty('No businesses found for this category and location. Try a larger radius or different town.');
+      return;
+    }
+
+    summaryDiv.textContent = 'Found ' + elements.length + ' result' + (elements.length !== 1 ? 's' : '');
+    summaryDiv.style.display = 'block';
+
+    // Sort by name
+    elements.sort(function(a, b) {
+      var na = (a.tags && a.tags.name || '').toLowerCase();
+      var nb = (b.tags && b.tags.name || '').toLowerCase();
+      return na < nb ? -1 : na > nb ? 1 : 0;
+    });
+
+    // Build table rows
+    tbody.innerHTML = '';
+    for (var i = 0; i < elements.length; i++) {
+      var el = elements[i];
+      var tags = el.tags || {};
+      var name = escapeHtml(tags.name || 'Unnamed');
+      var addr = escapeHtml(buildAddress(tags) || '—');
+      var website = tags.website || tags['contact:website'] || '';
+      var phone = tags.phone || tags['contact:phone'] || '';
+      var pUrl = previewUrl(type, el);
+
+      var tr = document.createElement('tr');
+      tr.innerHTML =
+        '<td class="name-cell">' + name + '</td>' +
+        '<td class="address-cell">' + addr + '</td>' +
+        '<td class="link-cell">' +
+          (website ? '<a href="' + escapeHtml(website) + '" target="_blank" rel="noopener">' + escapeHtml(website.replace(/^https?:\/\//,'')) + '</a><br>' : '') +
+          (phone ? escapeHtml(phone) : '') +
+        '</td>' +
+        '<td><a class="btn-preview" href="' + pUrl + '">Generate Preview &rarr;</a></td>';
+      tbody.appendChild(tr);
+    }
+
+    // Build cards
+    cardsDiv.innerHTML = '';
+    for (var j = 0; j < elements.length; j++) {
+      var cel = elements[j];
+      var ctags = cel.tags || {};
+      var cname = escapeHtml(ctags.name || 'Unnamed');
+      var caddr = escapeHtml(buildAddress(ctags) || '—');
+      var cwebsite = ctags.website || ctags['contact:website'] || '';
+      var cphone = ctags.phone || ctags['contact:phone'] || '';
+      var cpUrl = previewUrl(type, cel);
+
+      var card = document.createElement('div');
+      card.className = 'result-card';
+      var linksHtml = '';
+      if (cwebsite) linksHtml += '<a href="' + escapeHtml(cwebsite) + '" target="_blank" rel="noopener">' + escapeHtml(cwebsite.replace(/^https?:\/\//,'')) + '</a>';
+      if (cphone) linksHtml += (linksHtml ? ' &middot; ' : '') + escapeHtml(cphone);
+      card.innerHTML =
+        '<div class="rc-name">' + cname + '</div>' +
+        '<div class="rc-address">' + caddr + '</div>' +
+        '<div class="rc-links">' + (linksHtml || '&nbsp;') + '</div>' +
+        '<div class="rc-actions"><a class="btn-preview" href="' + cpUrl + '">Generate Preview &rarr;</a></div>';
+      cardsDiv.appendChild(card);
+    }
+  }
+
+  // ── Geocode via Nominatim ────────────────────────────────────
+  async function geocode(query) {
+    var url = 'https://nominatim.openstreetmap.org/search?format=json&limit=1&q=' + encodeURIComponent(query);
+    var resp = await fetch(url, {
+      headers: { 'Accept': 'application/json' }
+    });
+    if (!resp.ok) throw new Error('Geocoding failed (HTTP ' + resp.status + ')');
+    var data = await resp.json();
+    if (!data || data.length === 0) throw new Error('Town not found. Try a more specific name (e.g. "Gettysburg PA").');
+    return {
+      lat: parseFloat(data[0].lat),
+      lon: parseFloat(data[0].lon),
+      display_name: data[0].display_name
+    };
+  }
+
+  // ── Query Overpass API ──────────────────────────────────────
+  async function queryOverpass(tagKey, tagVal, lat, lon, radiusMeters) {
+    var query = '[out:json];node["' + tagKey + '"="' + tagVal + '"](around:' + radiusMeters + ',' + lat + ',' + lon + ');out;';
+    var resp = await fetch('https://overpass-api.de/api/interpreter', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: 'data=' + encodeURIComponent(query)
+    });
+    if (!resp.ok) throw new Error('Overpass API error (HTTP ' + resp.status + ')');
+    var data = await resp.json();
+    return data.elements || [];
+  }
+
+  // ── Debounce / delay utility ────────────────────────────────
+  function delay(ms) {
+    return new Promise(function(resolve) { setTimeout(resolve, ms); });
+  }
+
+  // ── Main search handler ─────────────────────────────────────
+  searchBtn.addEventListener('click', async function() {
+    var town = townInput.value.trim();
+    var category = catSelect.value;
+    var radiusKm = parseInt(radiusSlider.value, 10);
+    var radiusMeters = radiusKm * 1000;
+
+    if (!town) {
+      showError('Please enter a town or city name.');
+      return;
+    }
+    if (!category) {
+      showError('Please select a category.');
+      return;
+    }
+
+    searchBtn.disabled = true;
+    showLoading();
+
+    try {
+      // Geocode
+      var geo = await geocode(town);
+
+      // Short delay to respect Nominatim rate limits
+      await delay(600);
+
+      // Query Overpass
+      var tagInfo = TAG_MAP[category];
+      var results = await queryOverpass(tagInfo.tag[0], tagInfo.tag[1], geo.lat, geo.lon, radiusMeters);
+
+      // For distillery category, also try brewery
+      if (category === 'distillery') {
+        await delay(600);
+        try {
+          var brewResults = await queryOverpass('craft', 'brewery', geo.lat, geo.lon, radiusMeters);
+          results = results.concat(brewResults);
+        } catch (e) {
+          console.warn('Brewery sub-query failed (non-fatal):', e);
+        }
+      }
+
+      // Deduplicate by id
+      var seen = {};
+      results = results.filter(function(el) {
+        if (seen[el.id]) return false;
+        seen[el.id] = true;
+        return true;
+      });
+
+      // For food_truck category, filter to those that might be food trucks
+      // (fast_food covers a lot; we keep all but note in name)
+      if (category === 'food_truck') {
+        // Just use results as-is; OSM fast_food is the best proxy
+      }
+
+      renderResults(results, category);
+
+    } catch (err) {
+      console.error(err);
+      showError(err.message || 'Something went wrong. The OpenStreetMap servers may be busy — try again in a moment.');
+    } finally {
+      searchBtn.disabled = false;
+    }
+  });
+
+})();
+</script>
+</body>
+</html>
